@@ -11,13 +11,27 @@ export function useData() {
 }
 
 export function DataProvider({ children }) {
-  const [cryptoPrices, setCryptoPrices] = useState({
-    BTC: { price: 45000, change: 2.5, history: [] },
-    ETH: { price: 3200, change: -1.2, history: [] },
-    USDT: { price: 1.00, change: 0.1, history: [] },
-    BNB: { price: 320, change: 3.8, history: [] },
-    ADA: { price: 0.85, change: -2.1, history: [] }
-  });
+  const [cryptoPrices, setCryptoPrices] = useState({});
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,binancecoin,cardano&vs_currencies=usd');
+        const data = await res.json();
+        setCryptoPrices({
+          BTC: { price: data.bitcoin.usd, change: 0, history: [] },
+          ETH: { price: data.ethereum.usd, change: 0, history: [] },
+          USDT: { price: data['usd-coin'].usd, change: 0, history: [] },
+          BNB: { price: data.binancecoin.usd, change: 0, history: [] },
+          ADA: { price: data.cardano.usd, change: 0, history: [] }
+        });
+      } catch (error) {
+        console.error('Error fetching crypto prices:', error);
+      }
+    };
+
+    fetchPrices();
+  }, []);
 
   const [investmentPlans] = useState([
     {
@@ -57,42 +71,6 @@ export function DataProvider({ children }) {
       description: 'Para grandes inversores'
     }
   ]);
-
-  useEffect(() => {
-    const initialHistoryLength = 60;
-    const initialPrices = { ...cryptoPrices };
-    Object.keys(initialPrices).forEach(crypto => {
-      let currentPrice = initialPrices[crypto].price;
-      const history = [];
-      for (let i = 0; i < initialHistoryLength; i++) {
-        const change = (Math.random() - 0.5) * 2;
-        currentPrice = Math.max(0.01, currentPrice * (1 + change / 100));
-        history.unshift({ time: Date.now() - (initialHistoryLength - i) * 2000, value: currentPrice });
-      }
-      initialPrices[crypto].history = history;
-      initialPrices[crypto].price = currentPrice;
-    });
-    setCryptoPrices(initialPrices);
-
-    const interval = setInterval(() => {
-      setCryptoPrices(prev => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach(crypto => {
-          const change = (Math.random() - 0.5) * 2; // -1% a +1%
-          const newPrice = Math.max(0.01, updated[crypto].price * (1 + change / 100));
-          const newHistory = [...updated[crypto].history, { time: Date.now(), value: newPrice }].slice(-100); // Keep last 100 points
-          updated[crypto] = {
-            price: newPrice,
-            change: change,
-            history: newHistory
-          };
-        });
-        return updated;
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const getInvestments = () => {
     return JSON.parse(localStorage.getItem('cryptoinvest_investments') || '[]');
