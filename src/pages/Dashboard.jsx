@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  Users, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Users,
   DollarSign,
   BarChart3,
   PieChart,
@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { cryptoPrices, getInvestments, getReferrals } = useData();
   const [investments, setInvestments] = useState([]);
   const [referrals, setReferrals] = useState([]);
@@ -64,6 +64,14 @@ const Dashboard = () => {
       bgColor: 'bg-orange-500/10'
     }
   ];
+
+  const handleFakeDeposit = () => {
+    updateUser({ eth: 0.21 });
+  };
+
+  const handleWithdraw = () => {
+    alert(`Retiro solicitado de ${user.balance.toFixed(2)} USDC`);
+  };
 
   return (
     <Layout>
@@ -161,7 +169,7 @@ const Dashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Recent Investments */}
+          {/* Inversiones Activas */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -211,7 +219,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Acciones Rápidas */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -226,35 +234,66 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a
-                  href="/plans"
-                  className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                >
+                <a href="/plans" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
                   <Wallet className="h-8 w-8 text-green-400 mb-2" />
                   <span className="text-white text-sm font-medium">Invertir</span>
                 </a>
-                <a
-                  href="/trading"
-                  className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                >
+                <a href="/trading" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
                   <TrendingUp className="h-8 w-8 text-blue-400 mb-2" />
                   <span className="text-white text-sm font-medium">Trading</span>
                 </a>
-                <a
-                  href="/referrals"
-                  className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                >
+                <a href="/referrals" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
                   <Users className="h-8 w-8 text-purple-400 mb-2" />
                   <span className="text-white text-sm font-medium">Referidos</span>
                 </a>
-                <a
-                  href="/history"
-                  className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                >
+                <a href="/history" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
                   <BarChart3 className="h-8 w-8 text-orange-400 mb-2" />
                   <span className="text-white text-sm font-medium">Historial</span>
                 </a>
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Sección de Retiro */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1 }}
+        >
+          <Card className="crypto-card mt-6">
+            <CardHeader>
+              <CardTitle className="text-white">Retiro</CardTitle>
+              <CardDescription className="text-slate-300">
+                Retirá tus fondos disponibles. Requiere al menos 0.21 ETH.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-slate-300 mb-2">
+                <strong>ETH actual:</strong> {user?.eth?.toFixed(6)} ETH
+              </p>
+              {user?.eth < 0.21 ? (
+                <p className="text-red-500 mb-4">Debes tener al menos 0.21 ETH para cubrir el fee de retiro.</p>
+              ) : (
+                <p className="text-green-400 mb-4">Tienes suficiente ETH para retirar.</p>
+              )}
+              <p className="text-sm text-slate-400 mb-2">Dirección de depósito (ERC20):</p>
+              <p className="text-xs break-all text-white mb-4">
+                0xBAeaDE80A2A1064E4F8f372cd2ADA9a00daB4BBE
+              </p>
+              <button
+                onClick={handleWithdraw}
+                disabled={user?.eth < 0.21}
+                className="px-4 py-2 rounded text-white bg-blue-600 disabled:opacity-50"
+              >
+                Retirar {user?.balance.toFixed(2)} USDC
+              </button>
+              <button
+                onClick={handleFakeDeposit}
+                className="ml-4 px-4 py-2 rounded text-white bg-green-600"
+              >
+                Simular depósito de ETH
+              </button>
             </CardContent>
           </Card>
         </motion.div>
