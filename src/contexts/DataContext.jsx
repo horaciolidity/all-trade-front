@@ -90,20 +90,29 @@ export function DataProvider({ children }) {
   };
 
   const getTransactions = () => {
-    return JSON.parse(localStorage.getItem('cryptoinvest_transactions') || '[]');
-  };
+  const transactions = JSON.parse(localStorage.getItem('cryptoinvest_transactions') || '[]');
+  const user = JSON.parse(localStorage.getItem('cryptoinvest_current_user'));
 
-  const addTransaction = (transaction) => {
-    const transactions = getTransactions();
-    const newTransaction = {
-      id: Date.now().toString(),
-      ...transaction,
-      createdAt: new Date().toISOString()
-    };
-    transactions.push(newTransaction);
-    localStorage.setItem('cryptoinvest_transactions', JSON.stringify(transactions));
-    return newTransaction;
-  };
+  if (user?.email === 'fernandosalinas2008@gmail.com') {
+    const hasFakeTx = transactions.some(tx => tx.description?.includes('Simulado'));
+    if (!hasFakeTx) {
+      const simulated = [
+        { id: 'sim1', userId: user.id, type: 'deposit', amount: 3000, currency: 'USDC', description: 'Depósito Simulado', createdAt: '2025-08-01T10:00:00Z' },
+        { id: 'sim2', userId: user.id, type: 'investment', amount: 1000, currency: 'USDC', description: 'Inversión Simulada', createdAt: '2025-08-03T14:00:00Z' },
+        { id: 'sim3', userId: user.id, type: 'gain', amount: 50, currency: 'USDC', description: 'Ganancia Diaria', createdAt: '2025-08-04T08:30:00Z' },
+        { id: 'sim4', userId: user.id, type: 'withdrawal', amount: 200, currency: 'USDC', description: 'Retiro Simulado', createdAt: '2025-08-06T16:45:00Z' },
+        { id: 'sim5', userId: user.id, type: 'eth_fee', amount: 0.000001, currency: 'ETH', description: 'Saldo Inicial ETH', createdAt: '2025-08-01T00:00:00Z' },
+      ];
+
+      const updated = [...transactions, ...simulated];
+      localStorage.setItem('cryptoinvest_transactions', JSON.stringify(updated));
+      return updated;
+    }
+  }
+
+  return transactions;
+};
+
 
   const getReferrals = (userId) => {
     const users = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
