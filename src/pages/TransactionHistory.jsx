@@ -10,6 +10,7 @@ import { useData } from '@/contexts/DataContext';
 const TransactionHistory = () => {
   const { user } = useAuth();
   const { getTransactions, getInvestments } = useData();
+
   const [transactions, setTransactions] = useState([]);
   const [investments, setInvestments] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -18,10 +19,52 @@ const TransactionHistory = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    // ✅ Lógica especial para fernandosalinas2008@gmail.com
+    if (user.email === 'fernandosalinas2008@gmail.com') {
+      const fakeTx = Array.from({ length: 15 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i * 3);
+        const type = ['deposit', 'withdrawal', 'investment'][i % 3];
+        return {
+          id: `tx-fake-${i}`,
+          userId: user.id,
+          type,
+          description:
+            type === 'deposit'
+              ? 'Depósito bancario'
+              : type === 'withdrawal'
+              ? 'Retiro rápido'
+              : 'Inversión auto-generada',
+          amount: parseFloat((Math.random() * 1000 + 100).toFixed(2)),
+          status: 'completed',
+          createdAt: date.toISOString(),
+          planName: 'Plan Simulado',
+          dailyReturn: 1.2
+        };
+      });
+
+      const fakeInv = fakeTx
+        .filter(tx => tx.type === 'investment')
+        .map((tx, i) => ({
+          id: `inv-fake-${i}`,
+          userId: user.id,
+          amount: tx.amount,
+          planName: tx.planName,
+          dailyReturn: tx.dailyReturn,
+          duration: 30,
+          createdAt: tx.createdAt,
+        }));
+
+      setTransactions(fakeTx);
+      setInvestments(fakeInv);
+      setFilteredTransactions(fakeTx);
+    } else {
+      // 🔁 Para todos los demás usuarios, comportamiento normal
       const userTransactions = getTransactions().filter(t => t.userId === user.id);
       const userInvestments = getInvestments().filter(i => i.userId === user.id);
-      
+
       setTransactions(userTransactions);
       setInvestments(userInvestments);
       setFilteredTransactions(userTransactions);
@@ -38,7 +81,7 @@ const TransactionHistory = () => {
       filtered = filtered.filter(t => t.status === filterStatus);
     }
     if (searchTerm) {
-      filtered = filtered.filter(t => 
+      filtered = filtered.filter(t =>
         t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.type.toLowerCase().includes(searchTerm.toLowerCase())
       );
