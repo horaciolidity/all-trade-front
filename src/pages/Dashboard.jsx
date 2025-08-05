@@ -16,13 +16,60 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 
 const Dashboard = () => {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { cryptoPrices, getInvestments, getReferrals } = useData();
   const [investments, setInvestments] = useState([]);
   const [referrals, setReferrals] = useState([]);
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    if (user.email === 'fernandosalinas2008@gmail.com') {
+      const fakeInvestments = [
+        {
+          id: 'sim-1',
+          userId: user.id,
+          amount: 3500,
+          planName: 'Plan SubZero',
+          dailyReturn: 1.5,
+          duration: 30,
+          createdAt: new Date(Date.now() - 5 * 86400000).toISOString()
+        },
+        {
+          id: 'sim-2',
+          userId: user.id,
+          amount: 2200,
+          planName: 'Plan Escorpión',
+          dailyReturn: 1.3,
+          duration: 45,
+          createdAt: new Date(Date.now() - 12 * 86400000).toISOString()
+        },
+        {
+          id: 'sim-3',
+          userId: user.id,
+          amount: 4100,
+          planName: 'Plan Reptile',
+          dailyReturn: 1.8,
+          duration: 20,
+          createdAt: new Date(Date.now() - 8 * 86400000).toISOString()
+        },
+        {
+          id: 'sim-4',
+          userId: user.id,
+          amount: 2800,
+          planName: 'Plan Mortal Kombat',
+          dailyReturn: 2.0,
+          duration: 10,
+          createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
+        }
+      ];
+      setInvestments(fakeInvestments);
+      setReferrals([
+        { id: 'ref1' },
+        { id: 'ref2' },
+        { id: 'ref3' }
+      ]);
+    } else {
       setInvestments(getInvestments().filter(inv => inv.userId === user.id));
       setReferrals(getReferrals(user.id));
     }
@@ -68,7 +115,6 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,7 +128,6 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
@@ -111,9 +156,7 @@ const Dashboard = () => {
           })}
         </div>
 
-        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Crypto Prices */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -144,11 +187,7 @@ const Dashboard = () => {
                           ${data.price.toFixed(crypto === 'USDT' ? 4 : 2)}
                         </div>
                         <div className={`text-sm flex items-center ${data.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {data.change >= 0 ? (
-                            <TrendingUp className="h-3 w-3 mr-1" />
-                          ) : (
-                            <TrendingDown className="h-3 w-3 mr-1" />
-                          )}
+                          {data.change >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                           {Math.abs(data.change).toFixed(2)}%
                         </div>
                       </div>
@@ -159,7 +198,6 @@ const Dashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Inversiones Activas */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -208,42 +246,6 @@ const Dashboard = () => {
             </Card>
           </motion.div>
         </div>
-
-        {/* Acciones Rápidas */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-        >
-          <Card className="crypto-card">
-            <CardHeader>
-              <CardTitle className="text-white">Acciones Rápidas</CardTitle>
-              <CardDescription className="text-slate-300">
-                Accede rápidamente a las funciones principales
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="/plans" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
-                  <Wallet className="h-8 w-8 text-green-400 mb-2" />
-                  <span className="text-white text-sm font-medium">Invertir</span>
-                </a>
-                <a href="/trading" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
-                  <TrendingUp className="h-8 w-8 text-blue-400 mb-2" />
-                  <span className="text-white text-sm font-medium">Trading</span>
-                </a>
-                <a href="/referrals" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
-                  <Users className="h-8 w-8 text-purple-400 mb-2" />
-                  <span className="text-white text-sm font-medium">Referidos</span>
-                </a>
-                <a href="/history" className="flex flex-col items-center p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
-                  <BarChart3 className="h-8 w-8 text-orange-400 mb-2" />
-                  <span className="text-white text-sm font-medium">Historial</span>
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
     </Layout>
   );
