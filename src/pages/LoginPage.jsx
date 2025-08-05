@@ -122,10 +122,7 @@ const LoginPage = () => {
             </div>
 
             <div className="mt-4 p-4 bg-slate-800/50 rounded-lg">
-              <p className="text-xs text-slate-400 mb-2">Cuentas de prueba:</p>
-              <div className="text-xs text-slate-300 space-y-1">
-                <div>Admin: admin@test.com / admin123</div>
-                <div>Usuario: user@test.com / user123</div>
+             
               </div>
             </div>
           </CardContent>
