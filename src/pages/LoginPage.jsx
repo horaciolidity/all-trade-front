@@ -122,6 +122,10 @@ const LoginPage = () => {
             </div>
 
             <div className="mt-4 p-4 bg-slate-800/50 rounded-lg">
+              <p className="text-xs text-slate-400 mb-2">Todos los derechos reservados 2025.</p>
+              <div className="text-xs text-slate-300 space-y-1">
+                <div>All Trade</div>
+                <div></div>
              
               </div>
             </div>
