@@ -21,29 +21,70 @@ const TransactionHistory = () => {
   useEffect(() => {
     if (!user) return;
 
-    // ✅ Lógica especial para fernandosalinas2008@gmail.com
     if (user.email === 'fernandosalinas2008@gmail.com') {
-      const fakeTx = Array.from({ length: 15 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - i * 3);
-        const type = ['deposit', 'withdrawal', 'investment'][i % 3];
-        return {
-          id: `tx-fake-${i}`,
+      const fakeTx = [
+        {
+          id: 'tx-dep-1',
           userId: user.id,
-          type,
-          description:
-            type === 'deposit'
-              ? 'Depósito bancario'
-              : type === 'withdrawal'
-              ? 'Retiro rápido'
-              : 'Inversión auto-generada',
-          amount: parseFloat((Math.random() * 1000 + 100).toFixed(2)),
+          type: 'deposit',
+          description: 'Depósito bancario',
+          amount: 3100.75,
           status: 'completed',
-          createdAt: date.toISOString(),
-          planName: 'Plan Simulado',
-          dailyReturn: 1.2
-        };
-      });
+          createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+        },
+        {
+          id: 'tx-dep-2',
+          userId: user.id,
+          type: 'deposit',
+          description: 'Transferencia internacional',
+          amount: 2800.90,
+          status: 'completed',
+          createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+        },
+        {
+          id: 'tx-dep-3',
+          userId: user.id,
+          type: 'deposit',
+          description: 'Depósito en efectivo',
+          amount: 1500.00,
+          status: 'completed',
+          createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+        },
+        {
+          id: 'tx-dep-4',
+          userId: user.id,
+          type: 'deposit',
+          description: 'Pago por criptomonedas',
+          amount: 4200.25,
+          status: 'completed',
+          createdAt: new Date(Date.now() - 12 * 86400000).toISOString(),
+        },
+        {
+          id: 'tx-dep-5',
+          userId: user.id,
+          type: 'deposit',
+          description: 'Recarga tarjeta virtual',
+          amount: 3700.10,
+          status: 'completed',
+          createdAt: new Date(Date.now() - 15 * 86400000).toISOString(),
+        },
+        ...Array.from({ length: 10 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (i + 1) * 2);
+          const type = i % 2 === 0 ? 'investment' : 'withdrawal';
+          return {
+            id: `tx-fake-${i}`,
+            userId: user.id,
+            type,
+            description: type === 'investment' ? 'Inversión automática' : 'Retiro a billetera',
+            amount: parseFloat((Math.random() * 800 + 100).toFixed(2)),
+            status: 'completed',
+            createdAt: date.toISOString(),
+            planName: 'Plan Premium',
+            dailyReturn: 1.2,
+          };
+        }),
+      ];
 
       const fakeInv = fakeTx
         .filter(tx => tx.type === 'investment')
@@ -61,7 +102,6 @@ const TransactionHistory = () => {
       setInvestments(fakeInv);
       setFilteredTransactions(fakeTx);
     } else {
-      // 🔁 Para todos los demás usuarios, comportamiento normal
       const userTransactions = getTransactions().filter(t => t.userId === user.id);
       const userInvestments = getInvestments().filter(i => i.userId === user.id);
 
