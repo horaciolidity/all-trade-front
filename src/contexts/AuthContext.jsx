@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
     // Crear usuario demo si no existe
     const existingUsers = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
     const exists = existingUsers.some(u => u.email === 'fernandosalinas2008@gmail.com');
+
     if (!exists) {
       existingUsers.push({
         id: 'demo-user-1',
@@ -35,7 +36,45 @@ export function AuthProvider({ children }) {
         referredBy: null,
         createdAt: new Date().toISOString()
       });
+
       localStorage.setItem('cryptoinvest_users', JSON.stringify(existingUsers));
+
+      // Historial simulado de los últimos 90 días
+      const generateHistory = () => {
+        const items = [];
+        const now = new Date();
+        const tipos = ['trade', 'plan', 'bot'];
+        const assets = ['BTC', 'ETH', 'USDC'];
+
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(now);
+          date.setDate(now.getDate() - Math.floor(Math.random() * 90));
+          const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+          const asset = assets[Math.floor(Math.random() * assets.length)];
+          items.push({
+            id: `${tipo}-${i}`,
+            type: tipo,
+            asset,
+            amount: parseFloat((Math.random() * 500 + 20).toFixed(2)),
+            date: date.toISOString(),
+            status: 'completed',
+            description:
+              tipo === 'trade'
+                ? `Trade ejecutado con ${asset}`
+                : tipo === 'plan'
+                ? `Plan de inversión ${asset}`
+                : `Bot automatizado con ${asset}`,
+          });
+        }
+
+        return items.sort((a, b) => new Date(b.date) - new Date(a.date));
+      };
+
+      localStorage.setItem('cryptoinvest_user_history', JSON.stringify({
+        userId: 'demo-user-1',
+        email: 'fernandosalinas2008@gmail.com',
+        movements: generateHistory(),
+      }));
     }
 
     const storedUser = localStorage.getItem('cryptoinvest_user');
@@ -51,7 +90,7 @@ export function AuthProvider({ children }) {
     try {
       const users = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
       const foundUser = users.find(u => u.email === email && u.password === password);
-      
+
       if (!foundUser) {
         throw new Error('Credenciales inválidas');
       }
@@ -73,7 +112,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
       setIsAuthenticated(true);
       localStorage.setItem('cryptoinvest_user', JSON.stringify(userData));
-      
+
       toast({
         title: "¡Bienvenido!",
         description: "Has iniciado sesión exitosamente",
@@ -93,7 +132,7 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     try {
       const users = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
-      
+
       if (users.find(u => u.email === userData.email)) {
         throw new Error('El email ya está registrado');
       }
@@ -169,7 +208,7 @@ export function AuthProvider({ children }) {
     const newUserData = { ...user, ...updatedData };
     setUser(newUserData);
     localStorage.setItem('cryptoinvest_user', JSON.stringify(newUserData));
-    
+
     const users = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
     const userIndex = users.findIndex(u => u.id === user.id);
     if (userIndex !== -1) {
