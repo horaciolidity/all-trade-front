@@ -92,75 +92,78 @@ const UserStatsPage = () => {
             );
           })}
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-                <Card className="crypto-card">
-                    <CardHeader>
-                        <CardTitle className="text-white flex items-center"><Activity className="mr-2 h-5 w-5 text-indigo-400"/>Actividad Mensual</CardTitle>
-                        <CardDescription className="text-slate-300">Depósitos, retiros e inversiones en los últimos 6 meses.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={monthlyActivityData}>
-                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `$${value/1000}k`} />
-                                <Tooltip 
-                                    cursor={{fill: 'rgba(100, 116, 139, 0.1)'}}
-                                    contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
-                                    labelStyle={{ color: '#cbd5e1' }}
-                                />
-                                <Legend wrapperStyle={{fontSize: "12px"}}/>
-                                <Bar dataKey="deposits" fill="#22c55e" name="Depósitos" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="withdrawals" fill="#ef4444" name="Retiros" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="investments" fill="#3b82f6" name="Inversiones" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.5 }}>
-                 <Card className="crypto-card">
-                    <CardHeader>
-                        <CardTitle className="text-white flex items-center"><PieChart className="mr-2 h-5 w-5 text-rose-400"/>Distribución de Portafolio</CardTitle>
-                        <CardDescription className="text-slate-300">Cómo están distribuidas tus inversiones activas.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="h-[300px]">
-                    {investments.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={portfolioDistributionData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={100}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    fontSize={12}
-                                >
-                                    {portfolioDistributionData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
-                                    labelStyle={{ color: '#cbd5e1' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                         ) : (
-                          <div className="flex flex-col items-center justify-center h-full">
-                            <TrendingUp className="h-12 w-12 text-slate-600 mb-4" />
-                            <p className="text-slate-400">No hay datos de portafolio aún.</p>
-                            <p className="text-slate-500 text-sm">Realiza inversiones para ver tu distribución.</p>
-                          </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </motion.div>
-        </div>
+
+        {user?.email === 'fernandosalinas2008@gmail.com' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                  <Card className="crypto-card">
+                      <CardHeader>
+                          <CardTitle className="text-white flex items-center"><Activity className="mr-2 h-5 w-5 text-indigo-400"/>Actividad Mensual</CardTitle>
+                          <CardDescription className="text-slate-300">Depósitos, retiros e inversiones en los últimos 6 meses.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={monthlyActivityData}>
+                                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
+                                  <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `$${value/1000}k`} />
+                                  <Tooltip 
+                                      cursor={{fill: 'rgba(100, 116, 139, 0.1)'}}
+                                      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
+                                      labelStyle={{ color: '#cbd5e1' }}
+                                  />
+                                  <Legend wrapperStyle={{fontSize: "12px"}}/>
+                                  <Bar dataKey="deposits" fill="#22c55e" name="Depósitos" radius={[4, 4, 0, 0]} />
+                                  <Bar dataKey="withdrawals" fill="#ef4444" name="Retiros" radius={[4, 4, 0, 0]} />
+                                  <Bar dataKey="investments" fill="#3b82f6" name="Inversiones" radius={[4, 4, 0, 0]} />
+                              </BarChart>
+                          </ResponsiveContainer>
+                      </CardContent>
+                  </Card>
+              </motion.div>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.5 }}>
+                   <Card className="crypto-card">
+                      <CardHeader>
+                          <CardTitle className="text-white flex items-center"><PieChart className="mr-2 h-5 w-5 text-rose-400"/>Distribución de Portafolio</CardTitle>
+                          <CardDescription className="text-slate-300">Cómo están distribuidas tus inversiones activas.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="h-[300px]">
+                      {investments.length > 0 ? (
+                          <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <Pie
+                                      data={portfolioDistributionData}
+                                      cx="50%"
+                                      cy="50%"
+                                      labelLine={false}
+                                      outerRadius={100}
+                                      fill="#8884d8"
+                                      dataKey="value"
+                                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                      fontSize={12}
+                                  >
+                                      {portfolioDistributionData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                      ))}
+                                  </Pie>
+                                  <Tooltip 
+                                      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
+                                      labelStyle={{ color: '#cbd5e1' }}
+                                  />
+                              </PieChart>
+                          </ResponsiveContainer>
+                           ) : (
+                            <div className="flex flex-col items-center justify-center h-full">
+                              <TrendingUp className="h-12 w-12 text-slate-600 mb-4" />
+                              <p className="text-slate-400">No hay datos de portafolio aún.</p>
+                              <p className="text-slate-500 text-sm">Realiza inversiones para ver tu distribución.</p>
+                            </div>
+                          )}
+                      </CardContent>
+                  </Card>
+              </motion.div>
+          </div>
+        )}
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
             <Card className="crypto-card">
                 <CardHeader>
@@ -185,7 +188,6 @@ const UserStatsPage = () => {
                 </CardContent>
             </Card>
         </motion.div>
-
 
       </div>
     </Layout>
