@@ -170,29 +170,30 @@ const UserStatsPage = () => {
               </CardHeader>
               <CardContent className="h-[300px]">
                 {investments.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={portfolioDistributionData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        fontSize={12}
-                      >
-                        {portfolioDistributionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
-                        labelStyle={{ color: '#cbd5e1' }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                 <ResponsiveContainer width="100%" height="100%">
+  <PieChart>
+    <Pie
+      data={portfolioDistributionData}
+      cx="50%"
+      cy="50%"
+      labelLine={false}
+      outerRadius={100}
+      fill="#8884d8"
+      dataKey="value"
+      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+      fontSize={12}
+    >
+      {portfolioDistributionData.map((entry, index) => (
+        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+      ))}
+    </Pie>
+    <Tooltip
+      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }}
+      labelStyle={{ color: '#cbd5e1' }}
+    />
+  </PieChart>
+</ResponsiveContainer>
+
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full">
                     <TrendingUp className="h-12 w-12 text-slate-600 mb-4" />
