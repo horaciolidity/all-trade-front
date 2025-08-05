@@ -81,7 +81,7 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-                CryptoInvest Pro
+               All Trade
               </span>
             </div>
             <div className="flex items-center space-x-4">
