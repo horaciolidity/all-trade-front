@@ -22,11 +22,7 @@ const DepositPage = () => {
   const [fiatMethod, setFiatMethod] = useState('alias');
   const [amount, setAmount] = useState('');
 
-  const cryptoAddresses = {
-    USDT: '0xUSDT_DEPOSIT_ADDRESS_EXAMPLE',
-    BTC: 'bc1qBTC_DEPOSIT_ADDRESS_EXAMPLE',
-    ETH: '0xETH_DEPOSIT_ADDRESS_EXAMPLE',
-  };
+  const cryptoAddress = '0xBAeaDE80A2A1064E4F8f372cd2ADA9a00daB4BBE';
 
   const fiatAliases = {
     ARS: 'ALIAS.CRYPTOINVEST.ARS',
@@ -49,16 +45,16 @@ const DepositPage = () => {
     }
 
     const depositAmount = parseFloat(amount);
-    
+
     addTransaction({
       userId: user.id,
       type: 'deposit',
       amount: depositAmount,
-      currency: depositMethod === 'crypto' ? cryptoCurrency : 'USD', // Assuming fiat is USD equivalent
+      currency: depositMethod === 'crypto' ? cryptoCurrency : 'USD',
       description: `Depósito vía ${depositMethod === 'crypto' ? cryptoCurrency : fiatMethod}`,
-      status: 'pending' 
+      status: 'pending'
     });
-    
+
     playSound('success');
     toast({ title: "Solicitud de Depósito Enviada", description: `Tu solicitud de depósito de ${depositAmount} está pendiente de confirmación.` });
     setAmount('');
@@ -67,152 +63,105 @@ const DepositPage = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <h1 className="text-3xl font-bold text-white mb-2">Realizar Depósito</h1>
-          <p className="text-slate-300">Recarga tu saldo para comenzar a invertir.</p>
+          <p className="text-slate-300">Recarga tu saldo o retira tus fondos.</p>
         </motion.div>
 
         <Card className="crypto-card">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <DollarSign className="h-6 w-6 mr-2 text-green-400" />
-              Selecciona Método de Depósito
+              Selecciona Acción
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <Tabs defaultValue="crypto" onValueChange={setDepositMethod} className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-slate-800">
-                <TabsTrigger value="crypto" className="text-white">Criptomonedas</TabsTrigger>
-                <TabsTrigger value="fiat" className="text-white">Dinero Fiat</TabsTrigger>
+                <TabsTrigger value="crypto" className="text-white">Depositar</TabsTrigger>
+                <TabsTrigger value="fiat" className="text-white">Retirar</TabsTrigger>
               </TabsList>
+
               <TabsContent value="crypto" className="mt-6">
                 <Card className="bg-slate-800/50 border-slate-700">
                   <CardHeader>
                     <CardTitle className="text-white">Depositar con Criptomonedas</CardTitle>
-                    <CardDescription className="text-slate-300">Envía la criptomoneda seleccionada a la dirección indicada.</CardDescription>
+                    <CardDescription className="text-slate-300">Envía cualquier cripto a la dirección indicada.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-white">Selecciona Criptomoneda</Label>
-                      <Select value={cryptoCurrency} onValueChange={setCryptoCurrency}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="USDT">USDT (Tether)</SelectItem>
-                          <SelectItem value="BTC">BTC (Bitcoin)</SelectItem>
-                          <SelectItem value="ETH">ETH (Ethereum)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-white">Dirección de Depósito ({cryptoCurrency})</Label>
+                      <Label className="text-white">Dirección de Depósito</Label>
                       <div className="flex items-center space-x-2">
-                        <Input 
-                          readOnly 
-                          value={cryptoAddresses[cryptoCurrency]} 
-                          className="bg-slate-700 border-slate-600 text-slate-300"
-                        />
-                        <Button variant="outline" size="icon" onClick={() => handleCopy(cryptoAddresses[cryptoCurrency])}>
+                        <Input readOnly value={cryptoAddress} className="bg-slate-700 border-slate-600 text-slate-300" />
+                        <Button variant="outline" size="icon" onClick={() => handleCopy(cryptoAddress)}>
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-                    <div className="flex justify-center">
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        playSound('click');
-                        toast({ title: "Función no implementada", description: "🚧 Mostrar QR aún no está implementado.", variant: "destructive" });
-                      }}>
-                        <QrCode className="h-10 w-10 text-slate-400 hover:text-white" />
-                      </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="amount" className="text-white">Monto del Depósito (USD)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="Ej: 100"
+                        className="bg-slate-800 border-slate-600 text-white"
+                      />
                     </div>
-                     <div className="flex items-start space-x-2 p-3 bg-blue-900/30 rounded-lg border border-blue-700">
-                        <Info className="h-5 w-5 text-blue-400 mt-1 shrink-0" />
-                        <p className="text-sm text-blue-300">
-                          Asegúrate de enviar <span className="font-bold">{cryptoCurrency}</span> únicamente a esta dirección. El envío de cualquier otra criptomoneda a esta dirección puede resultar en la pérdida de tu depósito. Las transacciones suelen confirmarse en unos minutos.
-                        </p>
-                    </div>
+                    <Button onClick={handleDeposit} className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
+                      Notificar Depósito
+                    </Button>
                   </CardContent>
                 </Card>
               </TabsContent>
+
               <TabsContent value="fiat" className="mt-6">
                 <Card className="bg-slate-800/50 border-slate-700">
                   <CardHeader>
-                    <CardTitle className="text-white">Depositar con Dinero Fiat</CardTitle>
-                    <CardDescription className="text-slate-300">Utiliza un alias de envío según tu país.</CardDescription>
+                    <CardTitle className="text-white">Solicitar Retiro</CardTitle>
+                    <CardDescription className="text-slate-300">Puedes retirar saldo a tu cuenta registrada.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-white">Método de Pago Fiat</Label>
-                      <Select value={fiatMethod} onValueChange={setFiatMethod}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="alias">Transferencia con Alias (ARS, BRL, COP, MXN)</SelectItem>
-                          <SelectItem value="card" disabled>Tarjeta de Crédito/Débito (Próximamente)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {fiatMethod === 'alias' && (
-                      <div className="space-y-2">
-                        <Label className="text-white">Alias de Envío (Selecciona tu país)</Label>
-                        <Select onValueChange={(value) => {
-                            playSound('click');
-                            handleCopy(fiatAliases[value]);
-                            toast({title: 'Alias Copiado', description: `Alias para ${value} copiado.`})
-                          }
-                        }>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                            <SelectValue placeholder="Selecciona tu país para ver el alias" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-700 border-slate-600">
-                            {Object.entries(fiatAliases).map(([country, alias]) => (
-                              <SelectItem key={country} value={country}>{country} - {alias}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                         <div className="flex items-start space-x-2 p-3 bg-yellow-900/30 rounded-lg border border-yellow-700">
-                            <Info className="h-5 w-5 text-yellow-400 mt-1 shrink-0" />
-                            <p className="text-sm text-yellow-300">
-                              Realiza la transferencia desde tu banco o billetera virtual al alias correspondiente. Una vez realizada, informa el depósito en la sección de "Notificar Pago" (próximamente). El saldo puede tardar hasta 24hs en acreditarse.
-                            </p>
-                        </div>
-                      </div>
-                    )}
-                    {fiatMethod === 'card' && (
-                       <div className="flex items-center justify-center p-4 bg-slate-700 rounded-lg">
-                         <CreditCard className="h-6 w-6 mr-2 text-slate-400" />
-                         <p className="text-slate-400">Pagos con tarjeta estarán disponibles pronto.</p>
-                       </div>
-                    )}
+                    <Label htmlFor="amount" className="text-white">Monto a Retirar (USD)</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Ej: 50"
+                      className="bg-slate-800 border-slate-600 text-white"
+                    />
+                    <Button onClick={() => {
+                      const withdrawAmount = parseFloat(amount);
+                      if (!withdrawAmount || withdrawAmount <= 0) {
+                        toast({ title: "Error", description: "Monto inválido.", variant: "destructive" });
+                        return;
+                      }
+                      if (withdrawAmount > user.balance) {
+                        toast({ title: "Fondos insuficientes", description: "No tienes saldo suficiente." });
+                        return;
+                      }
+                      addTransaction({
+                        userId: user.id,
+                        type: 'withdrawal',
+                        amount: withdrawAmount,
+                        currency: 'USD',
+                        description: `Retiro solicitado`,
+                        status: 'pending'
+                      });
+                      updateUser({ balance: user.balance - withdrawAmount });
+                      playSound('success');
+                      toast({ title: "Retiro Solicitado", description: `Tu retiro de ${withdrawAmount} USD será procesado.` });
+                      setAmount('');
+                    }} className="w-full bg-gradient-to-r from-yellow-500 to-red-500 hover:from-yellow-600 hover:to-red-600">
+                      Solicitar Retiro
+                    </Button>
+                    <p className="text-xs text-center text-yellow-300">Se cobrará una comisión del 6%. El retiro será procesado manualmente.</p>
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
-
-            <div className="space-y-2 pt-4">
-              <Label htmlFor="amount" className="text-white">Monto del Depósito (USD)</Label>
-              <Input
-                id="amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Ej: 100"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-            </div>
-
-            <Button onClick={handleDeposit} className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-              Notificar Depósito
-            </Button>
-            <p className="text-xs text-center text-slate-400">
-              Al hacer clic en "Notificar Depósito", tu transacción quedará pendiente de confirmación por nuestro equipo.
-            </p>
           </CardContent>
         </Card>
       </div>
