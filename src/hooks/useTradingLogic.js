@@ -14,6 +14,8 @@ export const useTradingLogic = () => {
   const [isTrading, setIsTrading] = useState(false);
   const [trades, setTrades] = useState([]);
   const [virtualBalance, setVirtualBalance] = useState(10000);
+  const [mode, setMode] = useState('demo'); // o 'real'
+
   
   const priceHistory = cryptoPrices[selectedPair.split('/')[0]]?.history || [];
 
