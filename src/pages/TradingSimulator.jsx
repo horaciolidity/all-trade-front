@@ -78,7 +78,7 @@ const TradingSimulator = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            Simulador de Trading Avanzado
+            Practica con saldo virtual y gana con saldo real
           </h1>
           <p className="text-slate-300">
             Opera con gráficos en tiempo real, dinero virtual y chatea con otros traders.
