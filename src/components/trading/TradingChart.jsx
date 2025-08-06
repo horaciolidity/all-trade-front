@@ -3,7 +3,7 @@ import { createChart, ColorType } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
 
-const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
+const TradingChart = ({ priceHistory, selectedPair = 'BTC/USDT', cryptoPrices = {} }) => {
   const chartContainerRef = useRef();
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
@@ -13,8 +13,8 @@ const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
 
     if (!chartRef.current) {
       chartRef.current = createChart(chartContainerRef.current, {
-        width: chartContainerRef.current.clientWidth,
-        height: chartContainerRef.current.clientHeight, // Make chart responsive
+        width: chartContainerRef.current.clientWidth || 400,
+        height: chartContainerRef.current.clientHeight || 400,
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
           textColor: '#D1D5DB',
@@ -28,10 +28,9 @@ const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
           timeVisible: true,
           secondsVisible: false,
         },
-        crosshair: {
-          mode: 0, 
-        },
+        crosshair: { mode: 0 },
       });
+
       seriesRef.current = chartRef.current.addCandlestickSeries({
         upColor: '#22c55e',
         downColor: '#ef4444',
@@ -49,39 +48,42 @@ const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); 
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
-    if (seriesRef.current && priceHistory && priceHistory.length > 0) {
-      const sortedPriceHistory = [...priceHistory].sort((a, b) => a.time - b.time);
-      
-      const candlestickData = sortedPriceHistory.map((data, index) => {
-        const prevData = sortedPriceHistory[index - 1] || data;
+    const validData = Array.isArray(priceHistory) && priceHistory.length > 0
+      ? priceHistory
+      : [
+          { time: Date.now() - 30000, value: 100 },
+          { time: Date.now() - 20000, value: 102 },
+          { time: Date.now() - 10000, value: 101 },
+          { time: Date.now(), value: 103 }
+        ]; // mock de respaldo
+
+    if (seriesRef.current) {
+      const sorted = [...validData].sort((a, b) => a.time - b.time);
+
+      const candlestickData = sorted.map((data, index) => {
+        const prev = sorted[index - 1] || data;
         return {
-          time: data.time / 1000, 
-          open: prevData.value,
-          high: Math.max(prevData.value, data.value),
-          low: Math.min(prevData.value, data.value),
+          time: Math.floor(data.time / 1000),
+          open: prev.value,
+          high: Math.max(prev.value, data.value),
+          low: Math.min(prev.value, data.value),
           close: data.value,
         };
       });
 
-      if (candlestickData.length > 0) {
-        seriesRef.current.setData(candlestickData);
-        chartRef.current.timeScale().fitContent();
-      }
-    } else if (seriesRef.current) {
-      seriesRef.current.setData([]); 
+      seriesRef.current.setData(candlestickData);
+      chartRef.current.timeScale().fitContent();
     }
   }, [priceHistory]);
 
-  const currentCrypto = selectedPair.split('/')[0];
-  const currentPriceData = cryptoPrices[currentCrypto];
+  const currentCrypto = selectedPair?.split?.('/')[0] || 'BTC';
+  const currentPriceData = cryptoPrices?.[currentCrypto];
 
   return (
     <Card className="crypto-card h-full flex flex-col">
@@ -98,7 +100,9 @@ const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
           </div>
           {currentPriceData && (
             <div className="text-right">
-              <p className="text-xl sm:text-2xl font-bold text-white">${currentPriceData.price.toFixed(2)}</p>
+              <p className="text-xl sm:text-2xl font-bold text-white">
+                ${currentPriceData.price.toFixed(2)}
+              </p>
               <p className={`text-xs sm:text-sm ${currentPriceData.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {currentPriceData.change.toFixed(2)}% (24h)
               </p>
@@ -107,7 +111,10 @@ const TradingChart = ({ priceHistory, selectedPair, cryptoPrices }) => {
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-2 sm:p-4">
-        <div ref={chartContainerRef} className="w-full h-full min-h-[300px] sm:min-h-[400px] trading-chart rounded-lg" />
+        <div
+          ref={chartContainerRef}
+          className="w-full h-[400px] sm:h-[500px] trading-chart rounded-lg"
+        />
       </CardContent>
     </Card>
   );
