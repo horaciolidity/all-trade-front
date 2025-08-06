@@ -12,90 +12,87 @@ export function useData() {
 
 export function DataProvider({ children }) {
   const [cryptoPrices, setCryptoPrices] = useState({});
-const [basePrices, setBasePrices] = useState(null);
+  const [basePrices, setBasePrices] = useState(null);
 
-useEffect(() => {
-  // 1. Fetch real prices from Binance cada 10 segundos
-  const fetchRealPrices = async () => {
-    try {
-      const symbols = {
-        BTC: 'BTCUSDT',
-        ETH: 'ETHUSDT',
-        BNB: 'BNBUSDT',
-        ADA: 'ADAUSDT',
-      };
+  useEffect(() => {
+    // 1. Obtener precios reales desde Binance
+    const fetchRealPrices = async () => {
+      try {
+        const symbols = {
+          BTC: 'BTCUSDT',
+          ETH: 'ETHUSDT',
+          BNB: 'BNBUSDT',
+          ADA: 'ADAUSDT',
+        };
 
-      const responses = await Promise.all(
-        Object.values(symbols).map((symbol) =>
-          fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
-        )
-      );
+        const responses = await Promise.all(
+          Object.values(symbols).map((symbol) =>
+            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
+          )
+        );
 
-      const results = await Promise.all(responses.map((res) => res.json()));
+        const results = await Promise.all(responses.map((res) => res.json()));
 
-      const newBasePrices = {
-        BTC: parseFloat(results[0].price),
-        ETH: parseFloat(results[1].price),
-        BNB: parseFloat(results[2].price),
-        ADA: parseFloat(results[3].price),
-        USDT: 1,
-      };
+        const newBasePrices = {
+          BTC: parseFloat(results[0].price),
+          ETH: parseFloat(results[1].price),
+          BNB: parseFloat(results[2].price),
+          ADA: parseFloat(results[3].price),
+          USDT: 1,
+        };
 
-      setBasePrices(newBasePrices); // actualizamos los precios base
-    } catch (err) {
-      console.error('Error al obtener precios de Binance:', err);
-    }
-  };
-
-  fetchRealPrices(); // primera vez
-  const binanceInterval = setInterval(fetchRealPrices, 10000); // cada 10 seg
-
-  // 2. Simulación local de micro-fluctuación cada 1 seg
-  const simulationInterval = setInterval(() => {
-    if (!basePrices) return;
-
-    const fluctuate = (price) => {
-      const fluctuation = (Math.random() - 0.5) * 0.005 * price; // ±0.25%
-      return price + fluctuation;
+        setBasePrices(newBasePrices);
+      } catch (err) {
+        console.error('Error al obtener precios de Binance:', err);
+      }
     };
 
-    setCryptoPrices((prev) => ({
-      BTC: {
-        price: fluctuate(basePrices.BTC),
-        change: 0,
-        history: [...(prev.BTC?.history || []), basePrices.BTC].slice(-100),
-      },
-      ETH: {
-        price: fluctuate(basePrices.ETH),
-        change: 0,
-        history: [...(prev.ETH?.history || []), basePrices.ETH].slice(-100),
-      },
-      BNB: {
-        price: fluctuate(basePrices.BNB),
-        change: 0,
-        history: [...(prev.BNB?.history || []), basePrices.BNB].slice(-100),
-      },
-      ADA: {
-        price: fluctuate(basePrices.ADA),
-        change: 0,
-        history: [...(prev.ADA?.history || []), basePrices.ADA].slice(-100),
-      },
-      USDT: {
-        price: 1,
-        change: 0,
-        history: [...(prev.USDT?.history || []), 1].slice(-100),
-      },
-    }));
-  }, 1000); // cada 1 segundo
+    fetchRealPrices();
+    const binanceInterval = setInterval(fetchRealPrices, 10000); // cada 10s
 
-  return () => {
-    clearInterval(binanceInterval);
-    clearInterval(simulationInterval);
-  };
-}, []);
+    // 2. Simulación local cada 1 segundo
+    const simulationInterval = setInterval(() => {
+      if (!basePrices) return;
 
+      const fluctuate = (price) => {
+        const fluctuation = (Math.random() - 0.5) * 0.005 * price; // ±0.25%
+        return price + fluctuation;
+      };
 
+      setCryptoPrices((prev) => ({
+        BTC: {
+          price: fluctuate(basePrices.BTC),
+          change: 0,
+          history: [...(prev.BTC?.history || []), basePrices.BTC].slice(-100),
+        },
+        ETH: {
+          price: fluctuate(basePrices.ETH),
+          change: 0,
+          history: [...(prev.ETH?.history || []), basePrices.ETH].slice(-100),
+        },
+        BNB: {
+          price: fluctuate(basePrices.BNB),
+          change: 0,
+          history: [...(prev.BNB?.history || []), basePrices.BNB].slice(-100),
+        },
+        ADA: {
+          price: fluctuate(basePrices.ADA),
+          change: 0,
+          history: [...(prev.ADA?.history || []), basePrices.ADA].slice(-100),
+        },
+        USDT: {
+          price: 1,
+          change: 0,
+          history: [...(prev.USDT?.history || []), 1].slice(-100),
+        },
+      }));
+    }, 1000); // cada 1s
 
+    return () => {
+      clearInterval(binanceInterval);
+      clearInterval(simulationInterval);
+    };
+  }, []);
 
   const [investmentPlans] = useState([
     {
@@ -105,7 +102,7 @@ useEffect(() => {
       maxAmount: 999,
       dailyReturn: 1.5,
       duration: 30,
-      description: 'Perfecto para principiantes'
+      description: 'Perfecto para principiantes',
     },
     {
       id: 2,
@@ -114,7 +111,7 @@ useEffect(() => {
       maxAmount: 4999,
       dailyReturn: 2.0,
       duration: 30,
-      description: 'Para inversores intermedios'
+      description: 'Para inversores intermedios',
     },
     {
       id: 3,
@@ -123,7 +120,7 @@ useEffect(() => {
       maxAmount: 19999,
       dailyReturn: 2.5,
       duration: 30,
-      description: 'Para inversores avanzados'
+      description: 'Para inversores avanzados',
     },
     {
       id: 4,
@@ -131,8 +128,8 @@ useEffect(() => {
       minAmount: 20000,
       maxAmount: 100000,
       dailyReturn: 3.0,
-      description: 'Para grandes inversores'
-    }
+      description: 'Para grandes inversores',
+    },
   ]);
 
   const getInvestments = () => {
@@ -145,7 +142,7 @@ useEffect(() => {
       id: Date.now().toString(),
       ...investment,
       createdAt: new Date().toISOString(),
-      status: 'active'
+      status: 'active',
     };
     investments.push(newInvestment);
     localStorage.setItem('cryptoinvest_investments', JSON.stringify(investments));
@@ -157,7 +154,7 @@ useEffect(() => {
     const user = JSON.parse(localStorage.getItem('cryptoinvest_current_user'));
 
     if (user?.email === 'fernandosalinas2008@gmail.com') {
-      const hasFakeTx = transactions.some(tx => tx.description?.includes('Simulado'));
+      const hasFakeTx = transactions.some((tx) => tx.description?.includes('Simulado'));
       if (!hasFakeTx) {
         const simulated = [
           { id: 'sim1', userId: user.id, type: 'deposit', amount: 3000, currency: 'USDC', description: 'Depósito Simulado', createdAt: '2025-08-01T10:00:00Z' },
@@ -181,7 +178,7 @@ useEffect(() => {
     const newTransaction = {
       id: Date.now().toString(),
       ...transaction,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     const updated = [...transactions, newTransaction];
     localStorage.setItem('cryptoinvest_transactions', JSON.stringify(updated));
@@ -190,10 +187,10 @@ useEffect(() => {
 
   const getReferrals = (userId) => {
     const users = JSON.parse(localStorage.getItem('cryptoinvest_users') || '[]');
-    const user = users.find(u => u.id === userId);
+    const user = users.find((u) => u.id === userId);
     if (!user) return [];
 
-    return users.filter(u => u.referredBy === user.referralCode);
+    return users.filter((u) => u.referredBy === user.referralCode);
   };
 
   const value = {
@@ -203,12 +200,8 @@ useEffect(() => {
     addInvestment,
     getTransactions,
     addTransaction,
-    getReferrals
+    getReferrals,
   };
 
-  return (
-    <DataContext.Provider value={value}>
-      {children}
-    </DataContext.Provider>
-  );
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
