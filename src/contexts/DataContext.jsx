@@ -62,7 +62,7 @@ export function DataProvider({ children }) {
 
   fetchPrices(); // primer fetch inmediato
 
-  const interval = setInterval(fetchPrices, 1000); // 🔁 cada 1 segundos
+  const interval = setInterval(fetchPrices, 4000); // 🔁 cada 1 segundos
 
   return () => clearInterval(interval);
 }, []);
