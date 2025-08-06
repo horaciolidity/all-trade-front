@@ -14,58 +14,70 @@ export function DataProvider({ children }) {
   const [cryptoPrices, setCryptoPrices] = useState({});
 
 useEffect(() => {
-  const fetchPrices = async () => {
+  // 1. Petición inicial a CoinGecko
+  const fetchInitialPrices = async () => {
     try {
       const res = await fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,binancecoin,cardano&vs_currencies=usd'
       );
       const data = await res.json();
 
-      setCryptoPrices((prev) => {
-        const simulateFluctuation = (price) => {
-          const fluctuation = (Math.random() - 0.5) * 0.01 * price; // ±0.5%
-          return price + fluctuation;
-        };
-
-        return {
-          BTC: {
-            price: simulateFluctuation(data.bitcoin.usd),
-            change: 0,
-            history: [...(prev.BTC?.history || []), data.bitcoin.usd].slice(-100),
-          },
-          ETH: {
-            price: simulateFluctuation(data.ethereum.usd),
-            change: 0,
-            history: [...(prev.ETH?.history || []), data.ethereum.usd].slice(-100),
-          },
-          USDT: {
-            price: data['usd-coin'].usd,
-            change: 0,
-            history: [...(prev.USDT?.history || []), data['usd-coin'].usd].slice(-100),
-          },
-          BNB: {
-            price: simulateFluctuation(data.binancecoin.usd),
-            change: 0,
-            history: [...(prev.BNB?.history || []), data.binancecoin.usd].slice(-100),
-          },
-          ADA: {
-            price: simulateFluctuation(data.cardano.usd),
-            change: 0,
-            history: [...(prev.ADA?.history || []), data.cardano.usd].slice(-100),
-          },
-        };
+      // Seteamos los precios base
+      setCryptoPrices({
+        BTC: { price: data.bitcoin.usd, change: 0, history: [data.bitcoin.usd] },
+        ETH: { price: data.ethereum.usd, change: 0, history: [data.ethereum.usd] },
+        USDT: { price: data['usd-coin'].usd, change: 0, history: [data['usd-coin'].usd] },
+        BNB: { price: data.binancecoin.usd, change: 0, history: [data.binancecoin.usd] },
+        ADA: { price: data.cardano.usd, change: 0, history: [data.cardano.usd] },
       });
     } catch (error) {
-      console.error('Error fetching crypto prices:', error);
+      console.error('Error fetching initial prices:', error);
     }
   };
 
-  fetchPrices(); // inicial
+  fetchInitialPrices();
 
-  const interval = setInterval(fetchPrices, 5000); // 🔁 cada 1 segundo
+  // 2. Fluctuar con base en el precio actual (no volver a llamar a la API)
+  const interval = setInterval(() => {
+    setCryptoPrices((prev) => {
+      const fluctuate = (price) => {
+        const fluctuation = (Math.random() - 0.5) * 0.04 * price; // ±2%
+        return price + fluctuation;
+      };
+
+      return {
+        BTC: {
+          price: fluctuate(prev.BTC.price),
+          change: 0,
+          history: [...(prev.BTC.history || []), prev.BTC.price].slice(-100),
+        },
+        ETH: {
+          price: fluctuate(prev.ETH.price),
+          change: 0,
+          history: [...(prev.ETH.history || []), prev.ETH.price].slice(-100),
+        },
+        USDT: {
+          price: 1,
+          change: 0,
+          history: [...(prev.USDT.history || []), 1].slice(-100),
+        },
+        BNB: {
+          price: fluctuate(prev.BNB.price),
+          change: 0,
+          history: [...(prev.BNB.history || []), prev.BNB.price].slice(-100),
+        },
+        ADA: {
+          price: fluctuate(prev.ADA.price),
+          change: 0,
+          history: [...(prev.ADA.history || []), prev.ADA.price].slice(-100),
+        },
+      };
+    });
+  }, 1000); // cada 1 segundo
 
   return () => clearInterval(interval);
 }, []);
+
 
 
 
