@@ -13,15 +13,20 @@ import { useAuth } from '@/contexts/AuthContext';
 const Profile = () => {
   const { user } = useAuth();
 
-  const fakeUser =
-    user?.email === 'fernandosalinas2008@gmail.com'
-      ? {
-          name: 'Fernando Salinas',
-          email: 'fernandosalinas2008@gmail.com',
-          role: 'admin',
-          balance: 3574.89,
-        }
-      : user;
+  const isFernando = user?.email === 'fernandosalinas2008@gmail.com';
+
+  const fakeUser = isFernando
+    ? {
+        name: 'Fernando Salinas',
+        email: 'fernandosalinas2008@gmail.com',
+        role: 'admin',
+        balance: 17439.72,
+        region: 'Buenos Aires',
+        country: 'Argentina',
+        city: 'Ramallo',
+        initials: 'FS',
+      }
+    : user;
 
   return (
     <Layout>
@@ -32,9 +37,7 @@ const Profile = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-3xl font-bold text-white mb-2">Mi Perfil</h1>
-          <p className="text-slate-300">
-            Gestiona tu información personal y configuración de seguridad
-          </p>
+          <p className="text-slate-300">Gestiona tu información personal y configuración de seguridad</p>
         </motion.div>
 
         <motion.div
@@ -46,13 +49,20 @@ const Profile = () => {
             <CardContent className="p-6">
               <div className="flex items-center space-x-6">
                 <div className="relative">
-                  <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                    <User className="h-10 w-10 text-white" />
+                  <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                    {fakeUser?.initials || <User className="h-10 w-10" />}
                   </div>
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white">{fakeUser?.name}</h2>
                   <p className="text-slate-300">{fakeUser?.email}</p>
+                  {isFernando && (
+                    <>
+                      <p className="text-slate-400 mt-1 text-sm">
+                        {fakeUser.city}, {fakeUser.region}, {fakeUser.country}
+                      </p>
+                    </>
+                  )}
                   <div className="flex items-center space-x-4 mt-2">
                     <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
                       Cuenta Verificada
