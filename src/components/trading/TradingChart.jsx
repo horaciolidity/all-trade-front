@@ -1,12 +1,54 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const intervals = [
+  { label: '1 Minuto', value: '1' },
+  { label: '5 Minutos', value: '5' },
+  { label: '15 Minutos', value: '15' },
+  { label: '1 Hora', value: '60' },
+];
+
+// 🔧 Agrupa datos de priceHistory en velas por intervalo
+function groupCandles(data, intervalMinutes = 15) {
+  const intervalMs = intervalMinutes * 60 * 1000;
+  const buckets = new Map();
+
+  data.forEach((point) => {
+    const bucketTime = Math.floor(point.time / intervalMs) * intervalMs;
+    if (!buckets.has(bucketTime)) {
+      buckets.set(bucketTime, []);
+    }
+    buckets.get(bucketTime).push(point);
+  });
+
+  const candles = [];
+
+  for (const [bucketTime, points] of buckets.entries()) {
+    const open = points[0].value;
+    const close = points[points.length - 1].value;
+    const high = Math.max(...points.map(p => p.value));
+    const low = Math.min(...points.map(p => p.value));
+
+    candles.push({
+      time: Math.floor(bucketTime / 1000),
+      open,
+      high,
+      low,
+      close
+    });
+  }
+
+  return candles.sort((a, b) => a.time - b.time);
+}
 
 const TradingChart = ({ priceHistory, selectedPair = 'BTC/USDT', cryptoPrices = {} }) => {
   const chartContainerRef = useRef();
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
+  const [interval, setInterval] = useState('15'); // 15 minutos por defecto
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -57,30 +99,19 @@ const TradingChart = ({ priceHistory, selectedPair = 'BTC/USDT', cryptoPrices = 
     const validData = Array.isArray(priceHistory) && priceHistory.length > 0
       ? priceHistory
       : [
-          { time: Date.now() - 30000, value: 100 },
-          { time: Date.now() - 20000, value: 102 },
-          { time: Date.now() - 10000, value: 101 },
-          { time: Date.now(), value: 103 }
-        ]; // mock de respaldo
+          { time: Date.now() - 3600000, value: 100 },
+          { time: Date.now() - 3000000, value: 102 },
+          { time: Date.now() - 1800000, value: 98 },
+          { time: Date.now() - 600000, value: 103 },
+          { time: Date.now(), value: 101 }
+        ];
 
     if (seriesRef.current) {
-      const sorted = [...validData].sort((a, b) => a.time - b.time);
-
-      const candlestickData = sorted.map((data, index) => {
-        const prev = sorted[index - 1] || data;
-        return {
-          time: Math.floor(data.time / 1000),
-          open: prev.value,
-          high: Math.max(prev.value, data.value),
-          low: Math.min(prev.value, data.value),
-          close: data.value,
-        };
-      });
-
-      seriesRef.current.setData(candlestickData);
+      const candles = groupCandles(validData, parseInt(interval));
+      seriesRef.current.setData(candles);
       chartRef.current.timeScale().fitContent();
     }
-  }, [priceHistory]);
+  }, [priceHistory, interval]);
 
   const currentCrypto = selectedPair?.split?.('/')[0] || 'BTC';
   const currentPriceData = cryptoPrices?.[currentCrypto];
@@ -88,7 +119,7 @@ const TradingChart = ({ priceHistory, selectedPair = 'BTC/USDT', cryptoPrices = 
   return (
     <Card className="crypto-card h-full flex flex-col">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center flex-wrap gap-2">
           <div>
             <CardTitle className="text-white flex items-center text-lg sm:text-xl">
               <TrendingUp className="h-5 w-5 mr-2 text-green-400" />
@@ -98,16 +129,30 @@ const TradingChart = ({ priceHistory, selectedPair = 'BTC/USDT', cryptoPrices = 
               Visualiza el precio en tiempo real
             </CardDescription>
           </div>
-          {currentPriceData && (
-            <div className="text-right">
-              <p className="text-xl sm:text-2xl font-bold text-white">
-                ${currentPriceData.price.toFixed(2)}
-              </p>
-              <p className={`text-xs sm:text-sm ${currentPriceData.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {currentPriceData.change.toFixed(2)}% (24h)
-              </p>
-            </div>
-          )}
+          <div className="flex items-center space-x-4">
+            {currentPriceData && (
+              <div className="text-right">
+                <p className="text-xl sm:text-2xl font-bold text-white">
+                  ${currentPriceData.price.toFixed(2)}
+                </p>
+                <p className={`text-xs sm:text-sm ${currentPriceData.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {currentPriceData.change.toFixed(2)}% (24h)
+                </p>
+              </div>
+            )}
+            <Select value={interval} onValueChange={setInterval}>
+              <SelectTrigger className="w-[120px] bg-slate-700 text-white border-slate-600">
+                <SelectValue placeholder="Intervalo" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-700 text-white">
+                {intervals.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-2 sm:p-4">
