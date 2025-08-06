@@ -112,15 +112,43 @@ export const useTradingLogic = () => {
   }, [cryptoPrices]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      trades.forEach(trade => {
-        if (trade.status === 'open' && Date.now() >= trade.closeAt) {
-          closeTrade(trade.id);
+  const interval = setInterval(() => {
+    setTrades(prevTrades => {
+      return prevTrades.map(trade => {
+        if (trade.status === 'open') {
+          const crypto = trade.pair.split('/')[0];
+          const currentPrice = cryptoPrices[crypto]?.price;
+
+          if (!currentPrice) return trade;
+
+          let profit = 0;
+          if (trade.type === 'buy') {
+            profit = (currentPrice - trade.priceAtExecution) / trade.priceAtExecution * trade.amount;
+          } else {
+            profit = (trade.priceAtExecution - currentPrice) / trade.priceAtExecution * trade.amount;
+          }
+
+          // Cierre automático si el tiempo venció
+          if (Date.now() >= trade.closeAt) {
+            setVirtualBalance(prev => prev + trade.amount + profit);
+            toast({
+              title: "Trade Cerrado",
+              description: `Ganancia/Pérdida: ${profit >= 0 ? '+' : ''}${profit.toFixed(2)}`,
+              variant: profit >= 0 ? "default" : "destructive",
+            });
+
+            return { ...trade, status: 'closed', profit, priceAtClose: currentPrice };
+          }
+
+          return { ...trade, profit }; // 👈 actualizamos el profit en tiempo real
         }
+        return trade;
       });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [trades, closeTrade]);
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [cryptoPrices]);
 
   const resetBalance = () => {
     setVirtualBalance(10000);
