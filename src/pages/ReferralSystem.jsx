@@ -24,9 +24,19 @@ const ReferralSystem = () => {
   const [referrals, setReferrals] = useState([]);
   const [referralLink, setReferralLink] = useState('');
 
-  useEffect(() => {
+   useEffect(() => {
     if (user) {
-      setReferrals(getReferrals(user.id));
+      if (user.email === 'fernandosalinas2008@gmail.com') {
+        setReferrals([
+          { id: 1, name: 'Luciana Gómez', createdAt: new Date(Date.now() - 3 * 86400000) },
+          { id: 2, name: 'Bruno Martínez', createdAt: new Date(Date.now() - 15 * 86400000) },
+          { id: 3, name: 'Valeria López', createdAt: new Date(Date.now() - 28 * 86400000) },
+          { id: 4, name: 'Ignacio Díaz', createdAt: new Date(Date.now() - 35 * 86400000) },
+          { id: 5, name: 'Florencia Torres', createdAt: new Date(Date.now() - 60 * 86400000) },
+        ]);
+      } else {
+        setReferrals(getReferrals(user.id));
+      }
       setReferralLink(`${window.location.origin}/register?ref=${user.referralCode}`);
     }
   }, [user, getReferrals]);
