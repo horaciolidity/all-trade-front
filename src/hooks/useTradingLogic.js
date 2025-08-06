@@ -111,42 +111,50 @@ export const useTradingLogic = () => {
     );
   }, [cryptoPrices]);
 
-  useEffect(() => {
+ useEffect(() => {
   const interval = setInterval(() => {
-    setTrades(prevTrades => {
-      return prevTrades.map(trade => {
-        if (trade.status === 'open') {
-          const crypto = trade.pair.split('/')[0];
-          const currentPrice = cryptoPrices[crypto]?.price;
+    setTrades((prevTrades) => {
+      const updatedTrades = prevTrades.map((trade) => {
+        if (trade.status !== 'open') return trade;
 
-          if (!currentPrice) return trade;
+        const crypto = trade.pair.split('/')[0];
+        const currentPrice = cryptoPrices[crypto]?.price;
+        if (!currentPrice) return trade;
 
-          // Calcular profit en tiempo real (estilo normal, no binario)
-          let profit = 0;
-          if (trade.type === 'buy') {
-            profit = (currentPrice - trade.priceAtExecution) / trade.priceAtExecution * trade.amount;
-          } else {
-            profit = (trade.priceAtExecution - currentPrice) / trade.priceAtExecution * trade.amount;
-          }
-
-          // Cierre automático
-          if (Date.now() >= trade.closeAt) {
-            setVirtualBalance(prev => prev + trade.amount + profit);
-            toast({
-              title: "Trade Cerrado",
-              description: `Ganancia/Pérdida: ${profit >= 0 ? '+' : ''}${profit.toFixed(2)}`,
-              variant: profit >= 0 ? "default" : "destructive",
-            });
-
-            return { ...trade, status: 'closed', profit, priceAtClose: currentPrice };
-          }
-
-          // ❗ DEVOLVEMOS la actualización de profit en cada tick
-          return { ...trade, profit, currentPrice };
+        let profit = 0;
+        if (trade.type === 'buy') {
+          profit = (currentPrice - trade.priceAtExecution) / trade.priceAtExecution * trade.amount;
+        } else {
+          profit = (trade.priceAtExecution - currentPrice) / trade.priceAtExecution * trade.amount;
         }
 
-        return trade;
+        // Verificar si debe cerrarse por tiempo
+        if (Date.now() >= trade.closeAt) {
+          setVirtualBalance((prev) => prev + trade.amount + profit);
+          toast({
+            title: 'Trade Cerrado',
+            description: `Ganancia/Pérdida: ${profit >= 0 ? '+' : ''}${profit.toFixed(2)} USDT`,
+            variant: profit >= 0 ? 'default' : 'destructive',
+          });
+
+          return {
+            ...trade,
+            status: 'closed',
+            profit,
+            priceAtClose: currentPrice,
+            currentPrice,
+          };
+        }
+
+        // ✅ Devolver el trade actualizado con profit y currentPrice
+        return {
+          ...trade,
+          profit,
+          currentPrice,
+        };
       });
+
+      return updatedTrades;
     });
   }, 1000);
 
