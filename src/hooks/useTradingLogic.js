@@ -121,6 +121,7 @@ export const useTradingLogic = () => {
 
           if (!currentPrice) return trade;
 
+          // Calcular profit en tiempo real (estilo normal, no binario)
           let profit = 0;
           if (trade.type === 'buy') {
             profit = (currentPrice - trade.priceAtExecution) / trade.priceAtExecution * trade.amount;
@@ -128,7 +129,7 @@ export const useTradingLogic = () => {
             profit = (trade.priceAtExecution - currentPrice) / trade.priceAtExecution * trade.amount;
           }
 
-          // Cierre automático si el tiempo venció
+          // Cierre automático
           if (Date.now() >= trade.closeAt) {
             setVirtualBalance(prev => prev + trade.amount + profit);
             toast({
@@ -140,8 +141,10 @@ export const useTradingLogic = () => {
             return { ...trade, status: 'closed', profit, priceAtClose: currentPrice };
           }
 
-          return { ...trade, profit }; // 👈 actualizamos el profit en tiempo real
+          // ❗ DEVOLVEMOS la actualización de profit en cada tick
+          return { ...trade, profit, currentPrice };
         }
+
         return trade;
       });
     });
@@ -149,6 +152,7 @@ export const useTradingLogic = () => {
 
   return () => clearInterval(interval);
 }, [cryptoPrices]);
+
 
   const resetBalance = () => {
     setVirtualBalance(10000);
