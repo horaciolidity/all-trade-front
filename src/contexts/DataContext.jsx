@@ -12,87 +12,60 @@ export function useData() {
 
 export function DataProvider({ children }) {
   const [cryptoPrices, setCryptoPrices] = useState({});
-  const [basePrices, setBasePrices] = useState(null);
+useEffect(() => {
+  const fetchPrices = async () => {
+    try {
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,binancecoin,cardano&vs_currencies=usd'
+      );
+      const data = await res.json();
 
-  useEffect(() => {
-    // 1. Obtener precios reales desde Binance
-    const fetchRealPrices = async () => {
-      try {
-        const symbols = {
-          BTC: 'BTCUSDT',
-          ETH: 'ETHUSDT',
-          BNB: 'BNBUSDT',
-          ADA: 'ADAUSDT',
+      setCryptoPrices((prev) => {
+        const simulateFluctuation = (price) => {
+          const fluctuation = (Math.random() - 0.5) * 0.01 * price; // ±0.5%
+          return price + fluctuation;
         };
 
-        const responses = await Promise.all(
-          Object.values(symbols).map((symbol) =>
-            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
-          )
-        );
-
-        const results = await Promise.all(responses.map((res) => res.json()));
-
-        const newBasePrices = {
-          BTC: parseFloat(results[0].price),
-          ETH: parseFloat(results[1].price),
-          BNB: parseFloat(results[2].price),
-          ADA: parseFloat(results[3].price),
-          USDT: 1,
+        return {
+          BTC: {
+            price: simulateFluctuation(data.bitcoin.usd),
+            change: 0,
+            history: [...(prev.BTC?.history || []), data.bitcoin.usd].slice(-100),
+          },
+          ETH: {
+            price: simulateFluctuation(data.ethereum.usd),
+            change: 0,
+            history: [...(prev.ETH?.history || []), data.ethereum.usd].slice(-100),
+          },
+          USDT: {
+            price: data['usd-coin'].usd,
+            change: 0,
+            history: [...(prev.USDT?.history || []), data['usd-coin'].usd].slice(-100),
+          },
+          BNB: {
+            price: simulateFluctuation(data.binancecoin.usd),
+            change: 0,
+            history: [...(prev.BNB?.history || []), data.binancecoin.usd].slice(-100),
+          },
+          ADA: {
+            price: simulateFluctuation(data.cardano.usd),
+            change: 0,
+            history: [...(prev.ADA?.history || []), data.cardano.usd].slice(-100),
+          },
         };
+      });
+    } catch (error) {
+      console.error('Error fetching crypto prices:', error);
+    }
+  };
 
-        setBasePrices(newBasePrices);
-      } catch (err) {
-        console.error('Error al obtener precios de Binance:', err);
-      }
-    };
+  fetchPrices(); // primer fetch inmediato
 
-    fetchRealPrices();
-    const binanceInterval = setInterval(fetchRealPrices, 10000); // cada 10s
+  const interval = setInterval(fetchPrices, 5000); // 🔁 cada 5 segundos
 
-    // 2. Simulación local cada 1 segundo
-    const simulationInterval = setInterval(() => {
-      if (!basePrices) return;
+  return () => clearInterval(interval);
+}, []);
 
-      const fluctuate = (price) => {
-        const fluctuation = (Math.random() - 0.5) * 0.005 * price; // ±0.25%
-        return price + fluctuation;
-      };
-
-      setCryptoPrices((prev) => ({
-        BTC: {
-          price: fluctuate(basePrices.BTC),
-          change: 0,
-          history: [...(prev.BTC?.history || []), basePrices.BTC].slice(-100),
-        },
-        ETH: {
-          price: fluctuate(basePrices.ETH),
-          change: 0,
-          history: [...(prev.ETH?.history || []), basePrices.ETH].slice(-100),
-        },
-        BNB: {
-          price: fluctuate(basePrices.BNB),
-          change: 0,
-          history: [...(prev.BNB?.history || []), basePrices.BNB].slice(-100),
-        },
-        ADA: {
-          price: fluctuate(basePrices.ADA),
-          change: 0,
-          history: [...(prev.ADA?.history || []), basePrices.ADA].slice(-100),
-        },
-        USDT: {
-          price: 1,
-          change: 0,
-          history: [...(prev.USDT?.history || []), 1].slice(-100),
-        },
-      }));
-    }, 1000); // cada 1s
-
-    return () => {
-      clearInterval(binanceInterval);
-      clearInterval(simulationInterval);
-    };
-  }, []);
 
   const [investmentPlans] = useState([
     {
