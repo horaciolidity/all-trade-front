@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Send, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext'; // Para obtener datos del usuario actual
 import { useSound } from '@/contexts/SoundContext';
+const [mode, setMode] = useState('demo'); // o 'real'
+
 
 const countryFlags = {
   US: '🇺🇸', AR: '🇦🇷', BR: '🇧🇷', CO: '🇨🇴', MX: '🇲🇽', ES: '🇪🇸', DE: '🇩🇪', GB: '🇬🇧', FR: '🇫🇷', JP: '🇯🇵', CN: '🇨🇳',
@@ -84,6 +86,24 @@ const TradingSimulator = () => {
             Opera con gráficos en tiempo real, dinero virtual y chatea con otros traders.
           </p>
         </motion.div>
+        <div className="mt-4 flex items-center gap-4">
+  <span className="text-white">Modo de Trading:</span>
+  <Button 
+    variant={mode === 'demo' ? 'default' : 'outline'} 
+    onClick={() => setMode('demo')}
+    className={mode === 'demo' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'}
+  >
+    Saldo Virtual
+  </Button>
+  <Button 
+    variant={mode === 'real' ? 'default' : 'outline'} 
+    onClick={() => setMode('real')}
+    className={mode === 'real' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}
+  >
+    Saldo Real
+  </Button>
+</div>
+
 
         <TradingStats 
           virtualBalance={tradingLogic.virtualBalance}
