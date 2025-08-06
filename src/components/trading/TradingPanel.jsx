@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, RefreshCw, Clock } from 'lucide-react';
+import { Play, RefreshCw } from 'lucide-react';
+import { useTradingLogic } from '@/hooks/useTradingLogic';
 
 const TradingPanel = ({
   selectedPair,
@@ -22,6 +23,8 @@ const TradingPanel = ({
 }) => {
   const currentCrypto = selectedPair.split('/')[0];
   const currentPriceData = cryptoPrices[currentCrypto];
+
+  const { openTrades, closeTrade } = useTradingLogic();
 
   return (
     <Card className="crypto-card">
@@ -63,7 +66,10 @@ const TradingPanel = ({
 
         <div className="space-y-2">
           <Label className="text-white">Duración</Label>
-          <Select value={tradeDuration.toString()} onValueChange={(val) => setTradeDuration(parseInt(val))}>
+          <Select
+            value={tradeDuration.toString()}
+            onValueChange={(val) => setTradeDuration(parseInt(val))}
+          >
             <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
               <SelectValue />
             </SelectTrigger>
@@ -85,11 +91,11 @@ const TradingPanel = ({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-400">Cambio 24h:</span>
-              <span className={`font-semibold ${
-                currentPriceData.change >= 0 
-                  ? 'text-green-400' 
-                  : 'text-red-400'
-              }`}>
+              <span
+                className={`font-semibold ${
+                  currentPriceData.change >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
                 {currentPriceData.change.toFixed(2)}%
               </span>
             </div>
@@ -98,7 +104,10 @@ const TradingPanel = ({
 
         <div className="grid grid-cols-2 gap-4">
           <Button
-            onClick={() => { setTradeType('buy'); executeTrade(); }}
+            onClick={() => {
+              setTradeType('buy');
+              executeTrade();
+            }}
             disabled={isTrading}
             className="w-full bg-green-600 hover:bg-green-700"
           >
@@ -110,7 +119,10 @@ const TradingPanel = ({
             COMPRA
           </Button>
           <Button
-            onClick={() => { setTradeType('sell'); executeTrade(); }}
+            onClick={() => {
+              setTradeType('sell');
+              executeTrade();
+            }}
             disabled={isTrading}
             className="w-full bg-red-600 hover:bg-red-700"
           >
@@ -130,6 +142,47 @@ const TradingPanel = ({
         >
           Reiniciar Saldo Virtual
         </Button>
+
+        {/* ✅ Mostrar operaciones abiertas en tiempo real */}
+        {openTrades.length > 0 && (
+          <div className="pt-4 border-t border-slate-700">
+            <h3 className="text-white text-md font-bold mb-2">Operaciones Abiertas</h3>
+            {openTrades.map((trade) => (
+              <div
+                key={trade.id}
+                className="p-3 mb-2 rounded-lg bg-slate-800 border border-slate-700"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="text-white font-medium">
+                      {trade.pair} ({trade.type.toUpperCase()})
+                    </div>
+                    <div className="text-sm text-slate-400">
+                      Entrada: ${trade.priceAtExecution.toFixed(2)} | Actual:{' '}
+                      ${trade.currentPrice?.toFixed(2) || '...'}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div
+                      className={`font-bold ${
+                        trade.profit >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}
+                    >
+                      {trade.profit >= 0 ? '+' : ''}
+                      {trade.profit.toFixed(2)} USDT
+                    </div>
+                    <button
+                      onClick={() => closeTrade(trade.id, true)}
+                      className="text-xs text-blue-400 hover:underline mt-1"
+                    >
+                      Cerrar ahora
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
