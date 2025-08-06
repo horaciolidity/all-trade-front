@@ -4,8 +4,10 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { BarChartHorizontalBig, TrendingUp, Users, DollarSign, Gift, Star, Activity, CheckCircle, PieChart } from 'lucide-react';
+import { BarChartHorizontalBig, TrendingUp, Users, DollarSign, Star, Activity, CheckCircle, PieChart } from 'lucide-react';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Legend, Bar, Pie, Cell } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const UserStatsPage = () => {
   const { user } = useAuth();
@@ -13,67 +15,28 @@ const UserStatsPage = () => {
 
   const isFernando = user?.email === 'fernandosalinas2008@gmail.com';
 
-  // Simulados
-  const mockInvestments = [
-    {
-      id: 'inv1',
-      userId: user.id,
-      planName: 'Plan USDT 30 días',
-      amount: 100,
-      dailyReturn: 1.5,
-      duration: 30,
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'inv2',
-      userId: user.id,
-      planName: 'ETH Turbo',
-      amount: 200,
-      dailyReturn: 2,
-      duration: 15,
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ];
+  const investments = isFernando
+    ? [
+        { id: 1, userId: user.id, amount: 2000, dailyReturn: 1.5, duration: 30, planName: 'Plan A', createdAt: new Date(Date.now() - 10 * 86400000) },
+        { id: 2, userId: user.id, amount: 1500, dailyReturn: 2, duration: 15, planName: 'Plan B', createdAt: new Date(Date.now() - 5 * 86400000) },
+      ]
+    : getInvestments().filter(inv => inv.userId === user.id);
 
-  const mockTransactions = [
-    {
-      id: 'tx1',
-      userId: user.id,
-      type: 'deposit',
-      amount: 300,
-      status: 'completed',
-      createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-      description: 'Depósito inicial'
-    },
-    {
-      id: 'tx2',
-      userId: user.id,
-      type: 'investment',
-      amount: 100,
-      status: 'completed',
-      planName: 'Plan USDT 30 días',
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'tx3',
-      userId: user.id,
-      type: 'investment',
-      amount: 200,
-      status: 'completed',
-      planName: 'ETH Turbo',
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ];
+  const transactions = isFernando
+    ? [
+        { id: 'tx1', userId: user.id, amount: 1000, type: 'deposit', status: 'completed', createdAt: new Date(Date.now() - 3 * 86400000), description: 'Depósito inicial' },
+        { id: 'tx2', userId: user.id, amount: 300, type: 'withdrawal', status: 'completed', createdAt: new Date(Date.now() - 1 * 86400000), description: 'Retiro parcial' },
+        { id: 'tx3', userId: user.id, amount: 2000, type: 'investment', status: 'completed', createdAt: new Date(Date.now() - 10 * 86400000), planName: 'Plan A' },
+      ]
+    : getTransactions().filter(tx => tx.userId === user.id);
 
-  const mockReferrals = [{ id: 1 }, { id: 2 }, { id: 3 }];
-
-  const investments = isFernando ? mockInvestments : getInvestments().filter(inv => inv.userId === user.id);
-  const transactions = isFernando ? mockTransactions : getTransactions().filter(tx => tx.userId === user.id);
-  const referrals = isFernando ? mockReferrals : getReferrals(user.id);
+  const referrals = isFernando
+    ? Array.from({ length: 7 }).map((_, i) => ({ id: `ref${i}`, userId: user.id }))
+    : getReferrals(user.id);
 
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const totalEarningsFromInvestments = investments.reduce((sum, inv) => {
-    const daysPassed = Math.max(0, Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / (1000 * 60 * 60 * 24)));
+    const daysPassed = Math.max(0, Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / 86400000));
     return sum + (inv.amount * (inv.dailyReturn / 100) * Math.min(daysPassed, inv.duration));
   }, 0);
 
@@ -84,13 +47,15 @@ const UserStatsPage = () => {
     name: inv.planName,
     value: inv.amount
   }));
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const monthlyActivityData = Array.from({ length: 6 }, (_, i) => {
     const month = new Date();
     month.setMonth(month.getMonth() - i);
     const monthStr = month.toLocaleString('default', { month: 'short' });
-    const txInMonth = transactions.filter(tx => new Date(tx.createdAt).getMonth() === month.getMonth() && new Date(tx.createdAt).getFullYear() === month.getFullYear());
+    const txInMonth = transactions.filter(tx => {
+      const txDate = new Date(tx.createdAt);
+      return txDate.getMonth() === month.getMonth() && txDate.getFullYear() === month.getFullYear();
+    });
     return {
       month: monthStr,
       deposits: txInMonth.filter(t => t.type === 'deposit').reduce((s, t) => s + t.amount, 0),
@@ -117,7 +82,6 @@ const UserStatsPage = () => {
           <p className="text-slate-300">Un resumen detallado de tu actividad y rendimiento en la plataforma.</p>
         </motion.div>
 
-        {/* Estadísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {generalStats.map((stat, index) => {
             const Icon = stat.icon;
@@ -139,7 +103,6 @@ const UserStatsPage = () => {
           })}
         </div>
 
-        {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
             <Card className="crypto-card">
@@ -154,8 +117,8 @@ const UserStatsPage = () => {
                   <BarChart data={monthlyActivityData}>
                     <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
                     <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `$${value / 1000}k`} />
-                    <Tooltip contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Tooltip cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
+                    <Legend wrapperStyle={{ fontSize: "12px" }} />
                     <Bar dataKey="deposits" fill="#22c55e" name="Depósitos" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="withdrawals" fill="#ef4444" name="Retiros" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="investments" fill="#3b82f6" name="Inversiones" radius={[4, 4, 0, 0]} />
@@ -169,8 +132,7 @@ const UserStatsPage = () => {
             <Card className="crypto-card">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
-                  <PieChart className="mr-2 h-5 w-5 text-rose-400" />
-                  Distribución de Portafolio
+                  <PieChart className="mr-2 h-5 w-5 text-rose-400" /> Distribución de Portafolio
                 </CardTitle>
                 <CardDescription className="text-slate-300">Cómo están distribuidas tus inversiones activas.</CardDescription>
               </CardHeader>
@@ -187,13 +149,12 @@ const UserStatsPage = () => {
                         fill="#8884d8"
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        fontSize={12}
                       >
                         {portfolioDistributionData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
+                      <Tooltip contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
@@ -208,7 +169,6 @@ const UserStatsPage = () => {
           </motion.div>
         </div>
 
-        {/* Últimas transacciones */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
           <Card className="crypto-card">
             <CardHeader>
@@ -224,7 +184,7 @@ const UserStatsPage = () => {
                     <p className="text-xs text-slate-400">{tx.description || tx.planName}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`font-semibold ${tx.type === 'deposit' ? 'text-green-400' : 'text-red-400'}`}>
+                    <p className={`font-semibold ${tx.type === 'deposit' || (tx.type === 'investment' && tx.status === 'completed' && tx.dailyReturn) ? 'text-green-400' : 'text-red-400'}`}>
                       {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
                     </p>
                     <p className="text-xs text-slate-500">{new Date(tx.createdAt).toLocaleDateString()}</p>
