@@ -1,11 +1,37 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Layout from '@/components/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { BarChartHorizontalBig, TrendingUp, Users, DollarSign, Star, Activity, CheckCircle, PieChart } from 'lucide-react';
-import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Legend, Bar, Pie, Cell } from 'recharts';
+import {
+  BarChartHorizontalBig,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Star,
+  Activity,
+  CheckCircle,
+  PieChart
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Bar,
+  Pie,
+  Cell,
+  PieChart as RePieChart
+} from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -18,7 +44,7 @@ const UserStatsPage = () => {
   const investments = isFernando
     ? [
         { id: 1, userId: user.id, amount: 2000, dailyReturn: 1.5, duration: 30, planName: 'Plan A', createdAt: new Date(Date.now() - 10 * 86400000) },
-        { id: 2, userId: user.id, amount: 1500, dailyReturn: 2, duration: 15, planName: 'Plan B', createdAt: new Date(Date.now() - 5 * 86400000) },
+        { id: 2, userId: user.id, amount: 1500, dailyReturn: 2, duration: 15, planName: 'Plan B', createdAt: new Date(Date.now() - 5 * 86400000) }
       ]
     : getInvestments().filter(inv => inv.userId === user.id);
 
@@ -26,7 +52,7 @@ const UserStatsPage = () => {
     ? [
         { id: 'tx1', userId: user.id, amount: 1000, type: 'deposit', status: 'completed', createdAt: new Date(Date.now() - 3 * 86400000), description: 'Depósito inicial' },
         { id: 'tx2', userId: user.id, amount: 300, type: 'withdrawal', status: 'completed', createdAt: new Date(Date.now() - 1 * 86400000), description: 'Retiro parcial' },
-        { id: 'tx3', userId: user.id, amount: 2000, type: 'investment', status: 'completed', createdAt: new Date(Date.now() - 10 * 86400000), planName: 'Plan A' },
+        { id: 'tx3', userId: user.id, amount: 2000, type: 'investment', status: 'completed', createdAt: new Date(Date.now() - 10 * 86400000), planName: 'Plan A' }
       ]
     : getTransactions().filter(tx => tx.userId === user.id);
 
@@ -39,9 +65,6 @@ const UserStatsPage = () => {
     const daysPassed = Math.max(0, Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / 86400000));
     return sum + (inv.amount * (inv.dailyReturn / 100) * Math.min(daysPassed, inv.duration));
   }, 0);
-
-  const totalDeposits = transactions.filter(t => t.type === 'deposit' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0);
-  const totalWithdrawals = transactions.filter(t => t.type === 'withdrawal' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0);
 
   const portfolioDistributionData = investments.map(inv => ({
     name: inv.planName,
@@ -68,7 +91,7 @@ const UserStatsPage = () => {
     { title: 'Balance Actual', value: `$${(user?.balance || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-400' },
     { title: 'Total Invertido', value: `$${totalInvested.toFixed(2)}`, icon: TrendingUp, color: 'text-blue-400' },
     { title: 'Ganancias de Inversión', value: `$${totalEarningsFromInvestments.toFixed(2)}`, icon: Star, color: 'text-yellow-400' },
-    { title: 'Total Referidos', value: referrals.length, icon: Users, color: 'text-purple-400' },
+    { title: 'Total Referidos', value: referrals.length, icon: Users, color: 'text-purple-400' }
   ];
 
   return (
@@ -116,9 +139,9 @@ const UserStatsPage = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyActivityData}>
                     <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `$${value / 1000}k`} />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={value => `$${value / 1000}k`} />
                     <Tooltip cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
-                    <Legend wrapperStyle={{ fontSize: "12px" }} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Bar dataKey="deposits" fill="#22c55e" name="Depósitos" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="withdrawals" fill="#ef4444" name="Retiros" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="investments" fill="#3b82f6" name="Inversiones" radius={[4, 4, 0, 0]} />
@@ -139,7 +162,7 @@ const UserStatsPage = () => {
               <CardContent className="h-[300px]">
                 {investments.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <RePieChart>
                       <Pie
                         data={portfolioDistributionData}
                         cx="50%"
@@ -155,7 +178,7 @@ const UserStatsPage = () => {
                         ))}
                       </Pie>
                       <Tooltip contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '0.5rem' }} labelStyle={{ color: '#cbd5e1' }} />
-                    </PieChart>
+                    </RePieChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full">
@@ -180,11 +203,13 @@ const UserStatsPage = () => {
               {transactions.slice(0, 5).map(tx => (
                 <div key={tx.id} className="flex justify-between items-center p-3 mb-2 bg-slate-800/50 rounded-md">
                   <div>
-                    <p className="text-white capitalize">{tx.type === 'deposit' ? 'Depósito' : tx.type === 'withdrawal' ? 'Retiro' : 'Inversión'}</p>
+                    <p className="text-white capitalize">
+                      {tx.type === 'deposit' ? 'Depósito' : tx.type === 'withdrawal' ? 'Retiro' : 'Inversión'}
+                    </p>
                     <p className="text-xs text-slate-400">{tx.description || tx.planName}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`font-semibold ${tx.type === 'deposit' || (tx.type === 'investment' && tx.status === 'completed' && tx.dailyReturn) ? 'text-green-400' : 'text-red-400'}`}>
+                    <p className={`font-semibold ${tx.type === 'deposit' || (tx.type === 'investment' && tx.status === 'completed') ? 'text-green-400' : 'text-red-400'}`}>
                       {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
                     </p>
                     <p className="text-xs text-slate-500">{new Date(tx.createdAt).toLocaleDateString()}</p>
