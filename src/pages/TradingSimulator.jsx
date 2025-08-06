@@ -180,7 +180,8 @@ const TradingSimulator = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="w-full"
           >
-             <TradingPanel {...tradingLogic} />
+           <TradingPanel {...tradingLogic} mode={mode} />
+
         </motion.div>
 
 
