@@ -13,25 +13,60 @@ export function useData() {
 export function DataProvider({ children }) {
   const [cryptoPrices, setCryptoPrices] = useState({});
 
-  useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,binancecoin,cardano&vs_currencies=usd');
-        const data = await res.json();
-        setCryptoPrices({
-          BTC: { price: data.bitcoin.usd, change: 0, history: [] },
-          ETH: { price: data.ethereum.usd, change: 0, history: [] },
-          USDT: { price: data['usd-coin'].usd, change: 0, history: [] },
-          BNB: { price: data.binancecoin.usd, change: 0, history: [] },
-          ADA: { price: data.cardano.usd, change: 0, history: [] }
-        });
-      } catch (error) {
-        console.error('Error fetching crypto prices:', error);
-      }
-    };
+ useEffect(() => {
+  const fetchPrices = async () => {
+    try {
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,usd-coin,binancecoin,cardano&vs_currencies=usd'
+      );
+      const data = await res.json();
 
-    fetchPrices();
-  }, []);
+      setCryptoPrices((prev) => {
+        const simulateFluctuation = (price) => {
+          const fluctuation = (Math.random() - 0.5) * 0.01 * price; // ±0.5%
+          return price + fluctuation;
+        };
+
+        return {
+          BTC: {
+            price: simulateFluctuation(data.bitcoin.usd),
+            change: 0,
+            history: [...(prev.BTC?.history || []), data.bitcoin.usd].slice(-100),
+          },
+          ETH: {
+            price: simulateFluctuation(data.ethereum.usd),
+            change: 0,
+            history: [...(prev.ETH?.history || []), data.ethereum.usd].slice(-100),
+          },
+          USDT: {
+            price: data['usd-coin'].usd,
+            change: 0,
+            history: [...(prev.USDT?.history || []), data['usd-coin'].usd].slice(-100),
+          },
+          BNB: {
+            price: simulateFluctuation(data.binancecoin.usd),
+            change: 0,
+            history: [...(prev.BNB?.history || []), data.binancecoin.usd].slice(-100),
+          },
+          ADA: {
+            price: simulateFluctuation(data.cardano.usd),
+            change: 0,
+            history: [...(prev.ADA?.history || []), data.cardano.usd].slice(-100),
+          },
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching crypto prices:', error);
+    }
+  };
+
+  fetchPrices(); // primer fetch inmediato
+
+  const interval = setInterval(fetchPrices, 5000); // 🔁 cada 5 segundos
+
+  return () => clearInterval(interval);
+}, []);
+
 
   const [investmentPlans] = useState([
     {
