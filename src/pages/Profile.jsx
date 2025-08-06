@@ -52,7 +52,7 @@ const Profile = () => {
                       Cuenta Verificada
                     </span>
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
-                      {isFernando ? 'Administrador' : 'Usuario'}
+                      {isFernando ? 'Usuario' : 'Usuario'}
                     </span>
                   </div>
                 </div>
