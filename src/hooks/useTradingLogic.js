@@ -71,6 +71,8 @@ export const useTradingLogic = () => {
       closeAt: Date.now() + tradeDuration * 1000,
       status: 'open',
       profit: 0,
+      mode, // ✅ Simulado o real, según el selector actual
+
     };
 
     setTrades(prev => [newTrade, ...prev]);
