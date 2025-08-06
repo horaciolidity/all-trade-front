@@ -10,29 +10,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Send, MessageSquare } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext'; // Para obtener datos del usuario actual
+import { useAuth } from '@/contexts/AuthContext';
 import { useSound } from '@/contexts/SoundContext';
-const [mode, setMode] = useState('demo'); // o 'real'
-
 
 const countryFlags = {
-  US: '🇺🇸', AR: '🇦🇷', BR: '🇧🇷', CO: '🇨🇴', MX: '🇲🇽', ES: '🇪🇸', DE: '🇩🇪', GB: '🇬🇧', FR: '🇫🇷', JP: '🇯🇵', CN: '🇨🇳',
-  default: '🏳️'
+  US: '🇺🇸', AR: '🇦🇷', BR: '🇧🇷', CO: '🇨🇴', MX: '🇲🇽', ES: '🇪🇸',
+  DE: '🇩🇪', GB: '🇬🇧', FR: '🇫🇷', JP: '🇯🇵', CN: '🇨🇳', default: '🏳️'
 };
 
 const userLevels = {
-  newbie: '🌱', beginner: '🥉', intermediate: '🥈', advanced: '🥇', pro: '🏆', legend: '💎'
+  newbie: '🌱', beginner: '🥉', intermediate: '🥈',
+  advanced: '🥇', pro: '🏆', legend: '💎'
 };
 
 const getRandomCountry = () => {
   const countries = Object.keys(countryFlags).filter(c => c !== 'default');
   return countries[Math.floor(Math.random() * countries.length)];
-}
+};
 
 const getRandomLevel = () => {
   const levels = Object.keys(userLevels);
   return levels[Math.floor(Math.random() * levels.length)];
-}
+};
 
 const initialMessages = [
   { id: 1, user: 'TraderX', text: '¡BTC parece que va a subir!', country: 'US', level: 'pro', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
@@ -40,8 +39,8 @@ const initialMessages = [
   { id: 3, user: 'ElCriptoMaster', text: 'Cuidado con SOL, podría corregir.', country: 'MX', level: 'intermediate', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
 ];
 
-
 const TradingSimulator = () => {
+  const [mode, setMode] = useState('demo'); // ✅ CORRECTO
   const tradingLogic = useTradingLogic();
   const { user } = useAuth();
   const { playSound } = useSound();
@@ -62,14 +61,13 @@ const TradingSimulator = () => {
       id: chatMessages.length + 1,
       user: user?.name || 'UsuarioAnónimo',
       text: newMessage,
-      country: user?.countryCode || getRandomCountry(), 
+      country: user?.countryCode || getRandomCountry(),
       level: user?.tradingLevel || getRandomLevel(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setChatMessages([...chatMessages, message]);
     setNewMessage('');
   };
-
 
   return (
     <Layout>
@@ -86,26 +84,27 @@ const TradingSimulator = () => {
             Opera con gráficos en tiempo real, dinero virtual y chatea con otros traders.
           </p>
         </motion.div>
+
+        {/* 🔀 Selector de modo */}
         <div className="mt-4 flex items-center gap-4">
-  <span className="text-white">Modo de Trading:</span>
-  <Button 
-    variant={mode === 'demo' ? 'default' : 'outline'} 
-    onClick={() => setMode('demo')}
-    className={mode === 'demo' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'}
-  >
-    Saldo Virtual
-  </Button>
-  <Button 
-    variant={mode === 'real' ? 'default' : 'outline'} 
-    onClick={() => setMode('real')}
-    className={mode === 'real' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}
-  >
-    Saldo Real
-  </Button>
-</div>
+          <span className="text-white">Modo de Trading:</span>
+          <Button
+            variant={mode === 'demo' ? 'default' : 'outline'}
+            onClick={() => setMode('demo')}
+            className={mode === 'demo' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'}
+          >
+            Saldo Virtual
+          </Button>
+          <Button
+            variant={mode === 'real' ? 'default' : 'outline'}
+            onClick={() => setMode('real')}
+            className={mode === 'real' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}
+          >
+            Saldo Real
+          </Button>
+        </div>
 
-
-        <TradingStats 
+        <TradingStats
           virtualBalance={tradingLogic.virtualBalance}
           totalProfit={tradingLogic.totalProfit}
           openTradesCount={tradingLogic.openTrades.length}
@@ -117,20 +116,20 @@ const TradingSimulator = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="xl:col-span-9" 
+            className="xl:col-span-9"
           >
-            <TradingChart 
-              priceHistory={tradingLogic.priceHistory} 
+            <TradingChart
+              priceHistory={tradingLogic.priceHistory}
               selectedPair={tradingLogic.selectedPair}
               cryptoPrices={tradingLogic.cryptoPrices}
             />
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="xl:col-span-3" 
+            className="xl:col-span-3"
           >
             <Card className="crypto-card h-full flex flex-col">
               <CardHeader className="pb-2">
@@ -173,21 +172,19 @@ const TradingSimulator = () => {
             </Card>
           </motion.div>
         </div>
-        
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full"
-          >
-           <TradingPanel {...tradingLogic} mode={mode} />
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="w-full"
+        >
+          <TradingPanel {...tradingLogic} mode={mode} />
         </motion.div>
 
-
-        <TradesHistory 
-          trades={tradingLogic.trades} 
-          cryptoPrices={tradingLogic.cryptoPrices} 
+        <TradesHistory
+          trades={tradingLogic.trades}
+          cryptoPrices={tradingLogic.cryptoPrices}
           closeTrade={tradingLogic.closeTrade}
         />
       </div>
