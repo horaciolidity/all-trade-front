@@ -270,7 +270,7 @@ const LandingPage = () => {
               ¿Listo para comenzar tu viaje de inversión?
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              Únete a miles de inversores que ya están generando ganancias con CryptoInvest Pro
+              Únete a miles de inversores que ya están generando ganancias con All Trade
             </p>
             <Link to="/register">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-slate-100 text-lg px-8 py-4">
@@ -305,10 +305,10 @@ const LandingPage = () => {
           </div>
           <div className="flex justify-center items-center text-slate-400 mb-2">
             <MessageSquare className="h-5 w-5 mr-2 text-blue-400" />
-            <span>Soporte: support@cryptoinvestpro.com</span>
+            <span>Soporte: support@alltrade.com</span>
           </div>
           <p className="text-center text-slate-500">
-            © {new Date().getFullYear()} CryptoInvest Pro. Todos los derechos reservados.
+            © {new Date().getFullYear()} All Trade. Todos los derechos reservados.
           </p>
         </div>
       </footer>
