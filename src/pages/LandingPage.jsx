@@ -286,7 +286,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-              CryptoInvest Pro
+              All Trade
             </span>
           </div>
           <div className="flex justify-center space-x-6 mb-8">
