@@ -15,18 +15,11 @@ const Profile = () => {
 
   const isFernando = user?.email === 'fernandosalinas2008@gmail.com';
 
-  // Datos predeterminados para Fernando
   const displayName = isFernando ? 'Fernando Salinas' : user?.name || 'Usuario';
   const displayEmail = isFernando ? 'fernandosalinas2008@gmail.com' : user?.email;
   const displayBalance = isFernando ? 14251.43 : (user?.balance || 0);
-  const displayAddress = isFernando
-    ? 'Cra. 15 #45-67, Chapinero, Bogotá, Colombia'
-    : user?.address || 'No especificada';
-  const displayPhone = isFernando
-    ? `+57 ${Math.floor(3000000000 + Math.random() * 99999999)}`
-    : user?.phone || 'No especificado';
 
-  // Avatar generado simple para Fernando
+  // Avatar simple para Fernando
   const avatarUrl = isFernando
     ? 'https://ui-avatars.com/api/?name=Fernando+Salinas&background=0D8ABC&color=fff&size=128'
     : null;
@@ -44,7 +37,7 @@ const Profile = () => {
           <p className="text-slate-300">Gestiona tu información personal y configuración de seguridad</p>
         </motion.div>
 
-        {/* Tarjeta de perfil */}
+        {/* Tarjeta de perfil (solo saldo + verificado condicional) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,24 +59,23 @@ const Profile = () => {
                     </div>
                   )}
                 </div>
+
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white">{displayName}</h2>
                   <p className="text-slate-300">{displayEmail}</p>
-                  {isFernando && (
-                    <>
-                      <p className="text-slate-400 text-sm">{displayAddress}</p>
-                      <p className="text-slate-400 text-sm">{displayPhone}</p>
-                    </>
-                  )}
+
                   <div className="flex items-center space-x-4 mt-2">
-                    <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
-                      Cuenta Verificada
-                    </span>
+                    {isFernando && (
+                      <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                        Cuenta Verificada
+                      </span>
+                    )}
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
                       Usuario
                     </span>
                   </div>
                 </div>
+
                 <div className="text-right">
                   <p className="text-slate-400 text-sm">Saldo actual</p>
                   <p className="text-2xl font-bold text-green-400">
